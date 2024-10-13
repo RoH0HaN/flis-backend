@@ -20,5 +20,9 @@ app.use(express.static("public"));
 const api_v1 = "/api/v1";
 
 // -- Routes Imports --
+import admissionRoutes from "../routes/admission.routes.js";
+
+// -- Routes
+app.use(`${api_v1}/admission`, admissionRoutes);
 
 export { app };

@@ -86,7 +86,7 @@ const bankDetailsSchema = new Schema({
 // Main admission schema
 const admissionSchema = new Schema(
   {
-    studentDetails: personalDetailsSchema,
+    student_details: personalDetailsSchema,
     parent_guardian_details: {
       father_information: contactInfoSchema,
       mother_information: contactInfoSchema,
@@ -105,6 +105,4 @@ const admissionSchema = new Schema(
   { timestamps: true }
 );
 
-const Admission = model("Admission", admissionSchema);
-
-export default Admission;
+export const Admission = model("Admission", admissionSchema);
