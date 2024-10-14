@@ -8,7 +8,9 @@ import {
 
 const router = Router();
 
-router.route("/").post(upload.single("student_image"), submitAdmissionFrom);
+router
+  .route("/")
+  .post(upload.single("student_details[student_image]"), submitAdmissionFrom);
 router.route("/verify-payment").post(paymentVerification);
 
 export default router;
