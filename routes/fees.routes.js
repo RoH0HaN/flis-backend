@@ -3,13 +3,19 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   createFeesHeader,
   createFeesGroup,
-  updateFeesGroup,
+  createFeesMaster,
+  setAmount,
+  deleteHeaderInMaster,
+  addHeaderToMaster,
 } from "../controllers/fees.controller.js";
 
 const router = Router();
 
 router.route("/header/create").post(createFeesHeader);
 router.route("/group/create").post(createFeesGroup);
-router.route("/group/update").put(updateFeesGroup);
+router.route("/master/create").post(createFeesMaster);
+router.route("/master/set-amount").put(setAmount);
+router.route("/master/delete-header").put(deleteHeaderInMaster);
+router.route("/master/add-header").put(addHeaderToMaster);
 
 export default router;

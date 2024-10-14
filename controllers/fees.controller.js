@@ -1,11 +1,10 @@
-import { FeesHeader, FeesGroup } from "../models/fees.model.js";
+import { FeesHeader, FeesGroup, FeesMaster } from "../models/fees.model.js";
 import { ApiRes } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 
 const createFeesHeader = asyncHandler(async (req, res) => {
   try {
-    const { name, feesCode, occurance, dueDate, amount, description } =
-      req.body;
+    const { name, feesCode, occurance, dueDate, description } = req.body;
 
     if (!name || !feesCode || !occurance || !dueDate) {
       return res
@@ -26,7 +25,6 @@ const createFeesHeader = asyncHandler(async (req, res) => {
       feesCode,
       occurance,
       dueDate,
-      amount,
       description,
     });
 
@@ -47,13 +45,15 @@ const createFeesHeader = asyncHandler(async (req, res) => {
 
 const createFeesGroup = asyncHandler(async (req, res) => {
   try {
-    const { name, feesHeaders } = req.body;
+    const { name, groupCode } = req.body;
 
-    if (!name) {
-      return res.status(400).json(new ApiRes(400, null, "Name is required"));
+    if (!name || !groupCode) {
+      return res
+        .status(400)
+        .json(new ApiRes(400, null, "Name and group code is required"));
     }
 
-    const existingFeesGroup = await FeesGroup.findOne({ name });
+    const existingFeesGroup = await FeesGroup.findOne({ name, groupCode });
 
     if (existingFeesGroup) {
       return res
@@ -63,7 +63,7 @@ const createFeesGroup = asyncHandler(async (req, res) => {
 
     const newFeesGroup = new FeesGroup({
       name,
-      feesHeaders,
+      groupCode,
     });
 
     await newFeesGroup.save();
@@ -81,46 +81,164 @@ const createFeesGroup = asyncHandler(async (req, res) => {
   }
 });
 
-const updateFeesGroup = asyncHandler(async (req, res) => {
-  const { feesGroupID, feesHeaders } = req.body;
-
-  if (feesHeaders.length === 0) {
-    return res
-      .status(400)
-      .json(new ApiRes(400, null, "Atleast one fees header is required"));
-  }
-
+const createFeesMaster = asyncHandler(async (req, res) => {
   try {
-    const feesGroup = await FeesGroup.findById(feesGroupID);
+    const { group, headers } = req.body;
 
-    if (!feesGroup) {
+    if (!group || headers.length === 0) {
       return res
-        .status(404)
-        .json(new ApiRes(404, null, "Fees group not found"));
+        .status(400)
+        .json(new ApiRes(400, null, "Group and headers are required"));
     }
 
-    const existingFeesHeaders = feesGroup.feesHeaders;
+    if (headers.some((item) => !item.header)) {
+      return res.status(400).json(new ApiRes(400, null, "Header is required"));
+    }
 
-    feesHeaders.forEach((feesHeader) => {
-      if (!existingFeesHeaders.includes(feesHeader)) {
-        existingFeesHeaders.push(feesHeader);
-      }
+    const newFeesMaster = new FeesMaster({
+      group,
+      headers,
     });
 
-    feesGroup.feesHeaders = existingFeesHeaders;
-    await feesGroup.save();
+    await newFeesMaster.save();
 
     return res
-      .status(200)
-      .json(new ApiRes(200, feesGroup, "Fees group updated successfully"));
+      .status(201)
+      .json(new ApiRes(201, newFeesMaster, "Fees master created successfully"));
   } catch (error) {
-    console.error("Error updating fees group:", error);
+    console.error("Error creating fees master:", error);
     return res
       .status(500)
       .json(
-        new ApiRes(500, null, "An error occurred while updating fees group")
+        new ApiRes(500, null, "An error occurred while creating fees master")
       );
   }
 });
 
-export { createFeesHeader, createFeesGroup, updateFeesGroup };
+const setAmount = asyncHandler(async (req, res) => {
+  const { master_id, obj_id, amount } = req.body;
+
+  if (!master_id || !obj_id || !amount) {
+    return res
+      .status(400)
+      .json(
+        new ApiRes(400, null, "Master id, object id and amount are required")
+      );
+  }
+
+  try {
+    const master = await FeesMaster.findById(master_id);
+
+    if (!master) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees master not found"));
+    }
+
+    const obj = master.headers.find((item) => item._id.toString() === obj_id);
+
+    if (!obj) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Header object not found"));
+    }
+
+    obj.amount = amount;
+
+    await master.save();
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, master, "Fees master updated successfully"));
+  } catch (error) {
+    console.error("Error creating fees master:", error);
+    return res
+      .status(500)
+      .json(
+        new ApiRes(500, null, "An error occurred while creating fees master")
+      );
+  }
+});
+
+const deleteHeaderInMaster = asyncHandler(async (req, res) => {
+  const { master_id, obj_id } = req.body;
+
+  if (!master_id || !obj_id) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Master id and object id are required"));
+  }
+
+  try {
+    const master = await FeesMaster.findById(master_id);
+
+    if (!master) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees master not found"));
+    }
+
+    master.headers = master.headers.filter(
+      (item) => item._id.toString() !== obj_id
+    );
+
+    await master.save();
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Header object deleted successfully"));
+  } catch (error) {
+    console.error("Error creating fees master:", error);
+    return res
+      .status(500)
+      .json(
+        new ApiRes(500, null, "An error occurred while creating fees master")
+      );
+  }
+});
+
+const addHeaderToMaster = asyncHandler(async (req, res) => {
+  const { master_id, headers } = req.body;
+
+  if (!master_id || headers.length === 0) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Master id and headers are required"));
+  }
+
+  try {
+    const master = await FeesMaster.findById(master_id);
+
+    if (!master) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees master not found"));
+    }
+
+    headers.forEach((header) => {
+      master.headers.push({ header, amount: 0 });
+    });
+
+    await master.save();
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, master, "Fees master updated successfully"));
+  } catch (error) {
+    console.error("Error creating fees master:", error);
+    return res
+      .status(500)
+      .json(
+        new ApiRes(500, null, "An error occurred while creating fees master")
+      );
+  }
+});
+
+export {
+  createFeesHeader,
+  createFeesGroup,
+  createFeesMaster,
+  setAmount,
+  deleteHeaderInMaster,
+  addHeaderToMaster,
+};
