@@ -4,9 +4,9 @@ import { asyncHandler } from "../utils/async.handler.js";
 
 const createFeesHeader = asyncHandler(async (req, res) => {
   try {
-    const { name, feesCode, occurance, dueDate, description } = req.body;
+    const { name, feesCode, occurrence, dueDate, description } = req.body;
 
-    if (!name || !feesCode || !occurance || !dueDate) {
+    if (!name || !feesCode || !occurrence || !dueDate) {
       return res
         .status(400)
         .json(new ApiRes(400, null, "All fields are required"));
@@ -23,7 +23,7 @@ const createFeesHeader = asyncHandler(async (req, res) => {
     const newFeesHeader = new FeesHeader({
       name,
       feesCode,
-      occurance,
+      occurrence,
       dueDate,
       description,
     });

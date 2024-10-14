@@ -4,7 +4,7 @@ const feesHeader = new Schema(
   {
     name: { type: String, required: true },
     feesCode: { type: String, required: true },
-    occurance: { type: String, required: true },
+    occurrence: { type: String, required: true },
     dueDate: { type: String, required: true },
     description: { type: String, default: "N/A" },
   },
