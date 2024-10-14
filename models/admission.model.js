@@ -111,6 +111,19 @@ const admissionSchema = new Schema(
       enum: ["PENDING", "APPROVED", "ARCHIVED"],
       default: "PENDING",
     },
+    counselling_status: {
+      type: String,
+      enum: ["PENDING", "APPROVED", "REJECTED"],
+      default: "PENDING",
+    },
+    counselling_time: {
+      type: String,
+      default: null,
+    },
+    counselling_date: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

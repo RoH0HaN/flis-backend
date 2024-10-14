@@ -22,9 +22,11 @@ const api_v1 = "/api/v1";
 // -- Routes Imports --
 import admissionRoutes from "../routes/admission.routes.js";
 import feesRoutes from "../routes/fees.routes.js";
+import communicationRoutes from "../routes/communication.routes.js";
 
 // -- Routes
 app.use(`${api_v1}/admission`, admissionRoutes);
 app.use(`${api_v1}/fees`, feesRoutes);
+app.use(`${api_v1}/communication`, communicationRoutes);
 
 export { app };
