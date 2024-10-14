@@ -21,8 +21,10 @@ const api_v1 = "/api/v1";
 
 // -- Routes Imports --
 import admissionRoutes from "../routes/admission.routes.js";
+import feesRoutes from "../routes/fees.routes.js";
 
 // -- Routes
 app.use(`${api_v1}/admission`, admissionRoutes);
+app.use(`${api_v1}/fees`, feesRoutes);
 
 export { app };
