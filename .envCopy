@@ -1,0 +1,19 @@
+CORS_ORIGIN=*
+PORT=1250
+MONGODB_URL = mongodb+srv://ronorono251:Rohan123@cluster0.x8larth.mongodb.net
+ACCESS_TOKEN_SECRET = **!!..MyVeryOwnAccessTokenSecretFile..!!**
+ACCESS_TOKEN_EXPIRY = 1d
+REFRESH_TOKEN_SECRET = **!!..MyVeryOwnRefreshTokenSecretFile..!!**
+REFRESH_TOKEN_EXPIRY = 10d
+
+#NODEMAILER MAIL SERVICE
+MAILER_EMAIL = "ronorono251@gmail.com"
+MAILER_EMAIL_PASS = "rkkhheeyoljervmj"
+
+#PHONE-PE PAYMENT GATEWAY CREDENTIALS
+SALT_KEY = '96434309-7796-489d-8924-ab56988a6076'
+MERCHANT_ID = 'PGTESTPAYUAT86'
+PG_PRODUCTION_URL = "https://api.phonepe.com/apis/hermes/pg/v1/pay"
+PG_TESTING_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay"
+
+ 

@@ -101,6 +101,16 @@ const admissionSchema = new Schema(
       medical_details: medicalDetailsSchema,
     },
     bank_details: bankDetailsSchema,
+    payment_status: {
+      type: String,
+      enum: ["PAID", "UNPAID"],
+      default: "UNPAID",
+    },
+    application_status: {
+      type: String,
+      enum: ["PENDING", "APPROVED", "ARCHIVED"],
+      default: "PENDING",
+    },
   },
   { timestamps: true }
 );
