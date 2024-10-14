@@ -81,4 +81,46 @@ const createFeesGroup = asyncHandler(async (req, res) => {
   }
 });
 
-export { createFeesHeader, createFeesGroup };
+const updateFeesGroup = asyncHandler(async (req, res) => {
+  const { feesGroupID, feesHeaders } = req.body;
+
+  if (feesHeaders.length === 0) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Atleast one fees header is required"));
+  }
+
+  try {
+    const feesGroup = await FeesGroup.findById(feesGroupID);
+
+    if (!feesGroup) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees group not found"));
+    }
+
+    const existingFeesHeaders = feesGroup.feesHeaders;
+
+    feesHeaders.forEach((feesHeader) => {
+      if (!existingFeesHeaders.includes(feesHeader)) {
+        existingFeesHeaders.push(feesHeader);
+      }
+    });
+
+    feesGroup.feesHeaders = existingFeesHeaders;
+    await feesGroup.save();
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, feesGroup, "Fees group updated successfully"));
+  } catch (error) {
+    console.error("Error updating fees group:", error);
+    return res
+      .status(500)
+      .json(
+        new ApiRes(500, null, "An error occurred while updating fees group")
+      );
+  }
+});
+
+export { createFeesHeader, createFeesGroup, updateFeesGroup };
