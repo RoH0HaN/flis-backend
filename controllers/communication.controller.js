@@ -64,6 +64,7 @@ const sendEmailAndSmsForCounselling = asyncHandler(async (req, res) => {
 
     admission.counselling_date = date;
     admission.counselling_time = time;
+    admission.application_status = "UNDER-COUNSELLING";
     await admission.save();
 
     return res

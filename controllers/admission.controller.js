@@ -147,4 +147,34 @@ const paymentVerification = asyncHandler(async (req, res) => {
   }
 });
 
-export { submitAdmissionFrom, paymentVerification };
+const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
+  const { status } = req.params;
+  try {
+    const pendingApplications = await Admission.find({
+      application_status: status,
+      payment_status: "PAID",
+    });
+
+    return res.status(200).json(new ApiRes(200, { pendingApplications }));
+  } catch (error) {
+    console.error("Error getting pending applications:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const archiveApplication = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    await Admission.findByIdAndUpdate(id, { application_status: "ARCHIVED" });
+    return res.status(200).json(new ApiRes(200, null, "Application archived"));
+  } catch (error) {
+    console.error("Error archiving application:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+export {
+  submitAdmissionFrom,
+  paymentVerification,
+  getApplicationsBasedOnStatus,
+  archiveApplication,
+};
