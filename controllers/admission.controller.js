@@ -149,15 +149,88 @@ const paymentVerification = asyncHandler(async (req, res) => {
 
 const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
   const { status } = req.params;
+
   try {
-    const pendingApplications = await Admission.find({
-      application_status: status,
-      payment_status: "PAID",
+    // Only retrieve necessary fields to optimize performance
+    const applications = await Admission.find(
+      {
+        application_status: status,
+        payment_status: "PAID",
+      },
+      {
+        _id: 1,
+        "student_details.first_name": 1,
+        "student_details.last_name": 1,
+        "student_details.gender": 1,
+        "student_details.student_photo": 1,
+        "student_details.date_of_birth": 1,
+        "student_details.class": 1,
+        "parent_guardian_details.guardian_information.name": 1,
+        "parent_guardian_details.guardian_information.contact_no": 1,
+        "communication_address.current_address.village": 1,
+        "communication_address.current_address.post_office": 1,
+        "communication_address.current_address.police_station": 1,
+        "communication_address.current_address.postal_code": 1,
+      }
+    );
+
+    const applicationsList = applications.map((application) => {
+      const {
+        _id: id,
+        student_details: {
+          first_name,
+          last_name,
+          gender,
+          student_photo: photo,
+          date_of_birth,
+          class: studentClass,
+        },
+        parent_guardian_details: {
+          guardian_information: { name: guardianName, contact_no: phone },
+        },
+        communication_address: {
+          current_address: {
+            village,
+            post_office,
+            police_station,
+            postal_code,
+          },
+        },
+      } = application;
+
+      return {
+        id,
+        student_details: {
+          name: `${first_name} ${last_name}`,
+          gender,
+          photo,
+          date_of_birth,
+          class: studentClass,
+        },
+        guardian_details: {
+          name: guardianName,
+          phone,
+        },
+        address: {
+          village,
+          post_office,
+          police_station,
+          postal_code,
+        },
+      };
     });
 
-    return res.status(200).json(new ApiRes(200, { pendingApplications }));
+    return res
+      .status(200)
+      .json(
+        new ApiRes(
+          200,
+          applicationsList,
+          "Applications list fetched successfully."
+        )
+      );
   } catch (error) {
-    console.error("Error getting pending applications:", error);
+    console.error("Error getting applications:", error);
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
@@ -172,9 +245,23 @@ const archiveApplication = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
+
+const getApplicationById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const application = await Admission.findById(id);
+    return res
+      .status(200)
+      .json(new ApiRes(200, application, "Application fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching application:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
 export {
   submitAdmissionFrom,
   paymentVerification,
   getApplicationsBasedOnStatus,
   archiveApplication,
+  getApplicationById,
 };

@@ -6,6 +6,7 @@ import {
   paymentVerification,
   getApplicationsBasedOnStatus,
   archiveApplication,
+  getApplicationById,
 } from "../controllers/admission.controller.js";
 
 const router = Router();
@@ -14,9 +15,8 @@ router
   .route("/")
   .post(upload.single("student_details[student_image]"), submitAdmissionFrom);
 router.route("/verify-payment").post(paymentVerification);
-router
-  .route("/get-applications/:status")
-  .get(verifyJWT, getApplicationsBasedOnStatus);
+router.route("/get-applications/:status").get(getApplicationsBasedOnStatus);
 router.route("/archive-application/:id").put(verifyJWT, archiveApplication);
+router.route("/get-application/:id").get(getApplicationById);
 
 export default router;
