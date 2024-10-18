@@ -274,6 +274,66 @@ const getAllMasters = asyncHandler(async (req, res) => {
   }
 });
 
+const getHeaderById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Fees header id is required"));
+  }
+  try {
+    const header = await FeesHeader.findById(id).select(
+      "-__v -createdAt -updatedAt"
+    );
+
+    if (!header) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees header not found"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, header, "Fees header fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching fees header:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const updateHeader = asyncHandler(async (req, res) => {
+  const { id, name, feesCode, occurrence, dueDate, description } = req.body;
+
+  if (!id || !name || !feesCode || !occurrence || !dueDate || !description) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "All fields are required"));
+  }
+  try {
+    const header = await FeesHeader.findByIdAndUpdate(id, {
+      name,
+      feesCode,
+      occurrence,
+      dueDate,
+      description,
+    }).select("-__v -createdAt -updatedAt");
+
+    if (!header) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees header not found"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, header, "Fees header updated successfully"));
+  } catch (error) {
+    console.error("Error updating fees header:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
 export {
   createFeesHeader,
   createFeesGroup,
@@ -284,4 +344,6 @@ export {
   getAllHeaders,
   getAllGroups,
   getAllMasters,
+  getHeaderById,
+  updateHeader,
 };
