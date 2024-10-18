@@ -234,6 +234,20 @@ const addHeaderToMaster = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllHeaders = asyncHandler(async (req, res) => {
+  try {
+    const headers = await FeesHeader.find().select(
+      "-__v -createdAt -updatedAt"
+    );
+    return res
+      .status(200)
+      .json(new ApiRes(200, headers, "Fees headers fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching fees headers:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
 export {
   createFeesHeader,
   createFeesGroup,
@@ -241,4 +255,5 @@ export {
   setAmount,
   deleteHeaderInMaster,
   addHeaderToMaster,
+  getAllHeaders,
 };
