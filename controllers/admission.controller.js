@@ -4,6 +4,7 @@ import axios from "axios";
 import { ApiRes } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { uploadImageToFirebase } from "../utils/upload.images.firebase.js";
+import { application } from "express";
 
 const generatePaymentLink = async (transaction_details, doc_id) => {
   const { MUID, transactionId, amount, name, mobile } = transaction_details;
@@ -171,6 +172,7 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
         "communication_address.current_address.post_office": 1,
         "communication_address.current_address.police_station": 1,
         "communication_address.current_address.postal_code": 1,
+        application_status: 1,
       }
     );
 
@@ -196,6 +198,7 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
             postal_code,
           },
         },
+        application_status: status,
       } = application;
 
       return {
@@ -217,6 +220,7 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
           police_station,
           postal_code,
         },
+        status,
       };
     });
 
