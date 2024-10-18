@@ -107,6 +107,8 @@ const loginUser = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
