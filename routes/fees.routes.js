@@ -8,6 +8,8 @@ import {
   deleteHeaderInMaster,
   addHeaderToMaster,
   getAllHeaders,
+  getAllGroups,
+  getAllMasters,
 } from "../controllers/fees.controller.js";
 
 const router = Router();
@@ -19,5 +21,7 @@ router.route("/master/set-amount").put(setAmount);
 router.route("/master/delete-header").put(deleteHeaderInMaster);
 router.route("/master/add-header").put(addHeaderToMaster);
 router.route("/header/get-all").get(getAllHeaders);
+router.route("/group/get-all").get(getAllGroups);
+router.route("/master/get-all").get(getAllMasters);
 
 export default router;

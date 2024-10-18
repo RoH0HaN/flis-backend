@@ -248,6 +248,32 @@ const getAllHeaders = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllGroups = asyncHandler(async (req, res) => {
+  try {
+    const groups = await FeesGroup.find().select("-__v -createdAt -updatedAt");
+    return res
+      .status(200)
+      .json(new ApiRes(200, groups, "Fees groups fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching fees groups:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const getAllMasters = asyncHandler(async (req, res) => {
+  try {
+    const masters = await FeesMaster.find().select(
+      "-__v -createdAt -updatedAt"
+    );
+    return res
+      .status(200)
+      .json(new ApiRes(200, masters, "Fees masters fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching fees masters:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
 export {
   createFeesHeader,
   createFeesGroup,
@@ -256,4 +282,6 @@ export {
   deleteHeaderInMaster,
   addHeaderToMaster,
   getAllHeaders,
+  getAllGroups,
+  getAllMasters,
 };
