@@ -334,6 +334,34 @@ const updateHeader = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteHeader = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Fees header id is required"));
+  }
+  try {
+    const header = await FeesHeader.findByIdAndDelete(id).select(
+      "-__v -createdAt -updatedAt"
+    );
+
+    if (!header) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees header not found"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, header, "Fees header deleted successfully"));
+  } catch (error) {
+    console.error("Error deleting fees header:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
 export {
   createFeesHeader,
   createFeesGroup,
@@ -346,4 +374,5 @@ export {
   getAllMasters,
   getHeaderById,
   updateHeader,
+  deleteHeader,
 };

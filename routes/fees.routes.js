@@ -12,6 +12,7 @@ import {
   getAllMasters,
   getHeaderById,
   updateHeader,
+  deleteHeader,
 } from "../controllers/fees.controller.js";
 
 const router = Router();
@@ -27,5 +28,6 @@ router.route("/group/get-all").get(getAllGroups);
 router.route("/master/get-all").get(getAllMasters);
 router.route("/header/get/:id").get(getHeaderById);
 router.route("/header/update").put(updateHeader);
+router.route("/header/delete/:id").delete(deleteHeader);
 
 export default router;
