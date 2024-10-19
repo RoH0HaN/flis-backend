@@ -306,7 +306,7 @@ const getHeaderById = asyncHandler(async (req, res) => {
 const updateHeader = asyncHandler(async (req, res) => {
   const { id, name, feesCode, occurrence, dueDate, description } = req.body;
 
-  if (!id || !name || !feesCode || !occurrence || !dueDate || !description) {
+  if (!id || !name || !feesCode || !occurrence || !dueDate) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "All fields are required"));
@@ -328,7 +328,7 @@ const updateHeader = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiRes(200, header, "Fees header updated successfully"));
+      .json(new ApiRes(200, null, "Fees header updated successfully"));
   } catch (error) {
     console.error("Error updating fees header:", error);
     return res.status(500).json(new ApiRes(500, null, error.message));
@@ -356,7 +356,93 @@ const deleteHeader = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiRes(200, header, "Fees header deleted successfully"));
+      .json(new ApiRes(200, null, "Fees header deleted successfully"));
+  } catch (error) {
+    console.error("Error deleting fees header:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const getGroupById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Fees group id is required"));
+  }
+  try {
+    const group = await FeesGroup.findById(id).select(
+      "-__v -createdAt -updatedAt"
+    );
+
+    if (!group) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees group not found"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, group, "Fees group fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching fees header:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const updateGroup = asyncHandler(async (req, res) => {
+  const { id, name, groupCode, description } = req.body;
+
+  if (!id || !name) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "All fields are required"));
+  }
+  try {
+    const group = await FeesGroup.findByIdAndUpdate(id, {
+      name,
+      groupCode,
+      description,
+    }).select("-__v -createdAt -updatedAt");
+
+    if (!group) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees group not found"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Fees header updated successfully"));
+  } catch (error) {
+    console.error("Error updating fees header:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const deleteGroup = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Fees header id is required"));
+  }
+  try {
+    const group = await FeesGroup.findByIdAndDelete(id).select(
+      "-__v -createdAt -updatedAt"
+    );
+
+    if (!group) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees group not found"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Fees group deleted successfully"));
   } catch (error) {
     console.error("Error deleting fees header:", error);
     return res.status(500).json(new ApiRes(500, null, error.message));
@@ -376,4 +462,7 @@ export {
   getHeaderById,
   updateHeader,
   deleteHeader,
+  getGroupById,
+  updateGroup,
+  deleteGroup,
 };
