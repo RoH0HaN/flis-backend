@@ -449,6 +449,34 @@ const deleteGroup = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteMaster = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Fees master id is required"));
+  }
+  try {
+    const master = await FeesMaster.findByIdAndDelete(id).select(
+      "-__v -createdAt -updatedAt"
+    );
+
+    if (!master) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees master not found"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Fees master deleted successfully"));
+  } catch (error) {
+    console.error("Error deleting fees master:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
 export {
   createFeesHeader,
   createFeesGroup,
@@ -465,4 +493,5 @@ export {
   getGroupById,
   updateGroup,
   deleteGroup,
+  deleteMaster,
 };

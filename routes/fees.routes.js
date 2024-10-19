@@ -16,6 +16,7 @@ import {
   getGroupById,
   updateGroup,
   deleteGroup,
+  deleteMaster,
 } from "../controllers/fees.controller.js";
 
 const router = Router();
@@ -35,5 +36,6 @@ router.route("/header/delete/:id").delete(deleteHeader);
 router.route("/group/get/:id").get(getGroupById);
 router.route("/group/update").put(updateGroup);
 router.route("/group/delete/:id").delete(deleteGroup);
+router.route("/master/delete/:id").delete(deleteMaster);
 
 export default router;
