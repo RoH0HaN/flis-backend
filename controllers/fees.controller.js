@@ -45,7 +45,7 @@ const createFeesHeader = asyncHandler(async (req, res) => {
 
 const createFeesGroup = asyncHandler(async (req, res) => {
   try {
-    const { name, groupCode } = req.body;
+    const { name, groupCode, description } = req.body;
 
     if (!name || !groupCode) {
       return res
@@ -64,6 +64,7 @@ const createFeesGroup = asyncHandler(async (req, res) => {
     const newFeesGroup = new FeesGroup({
       name,
       groupCode,
+      description,
     });
 
     await newFeesGroup.save();
