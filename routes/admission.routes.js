@@ -11,12 +11,10 @@ import {
 
 const router = Router();
 
-router
-  .route("/")
-  .post(upload.single("student_details[student_image]"), submitAdmissionFrom);
+router.route("/").post(upload.single("student_image"), submitAdmissionFrom);
 router.route("/verify-payment").post(paymentVerification);
 router.route("/get-applications/:status").get(getApplicationsBasedOnStatus);
-router.route("/archive-application/:id").put(verifyJWT, archiveApplication);
+router.route("/archive-application/:id").delete(verifyJWT, archiveApplication);
 router.route("/get-application/:id").get(getApplicationById);
 
 export default router;

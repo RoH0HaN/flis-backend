@@ -27,7 +27,7 @@ async function sendCounsellingSms(
   };
 
   try {
-    // const response = await axios(config);
+    const response = await axios(config);
     // console.log("SMS sent: ", response.data);
   } catch (error) {
     console.error("Error sending SMS: ", error);

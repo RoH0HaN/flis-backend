@@ -60,7 +60,7 @@ const submitAdmissionFrom = asyncHandler(async (req, res) => {
 
     const studentPhotoUrl = await uploadImageToFirebase(
       req.file.path,
-      "student_images"
+      "student_image"
     );
     student_details.student_photo = studentPhotoUrl;
 
@@ -241,6 +241,7 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
 
 const archiveApplication = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  console.log("Id: ", id);
   try {
     await Admission.findByIdAndUpdate(id, { application_status: "ARCHIVED" });
     return res.status(200).json(new ApiRes(200, null, "Application archived"));
