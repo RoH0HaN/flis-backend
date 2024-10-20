@@ -138,7 +138,7 @@ const paymentVerification = asyncHandler(async (req, res) => {
 
     if (data?.success === true) {
       await Admission.findByIdAndUpdate(docId, { payment_status: "PAID" });
-      return res.redirect("http://localhost:1250/success");
+      return res.redirect("http://localhost:3001");
     }
 
     return res.redirect("http://localhost:1250/error");
