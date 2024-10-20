@@ -77,10 +77,10 @@ const previousInstituteSchema = new Schema({
 
 // Subschema for bank details
 const bankDetailsSchema = new Schema({
-  account_holder_name: { type: String, required: true },
-  bank_name: { type: String, required: true },
-  account_no: { type: String, required: true },
-  ifsc_code: { type: String, required: true },
+  account_holder_name: { type: String, default: "N/A" },
+  bank_name: { type: String, default: "N/A" },
+  account_no: { type: String, default: "N/A" },
+  ifsc_code: { type: String, default: "N/A" },
 });
 
 // Main admission schema
