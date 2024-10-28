@@ -38,9 +38,9 @@ const createSession = asyncHandler(async (req, res) => {
 });
 
 const deleteSession = asyncHandler(async (req, res) => {
-  const { id } = req.query;
+  const { id } = req.params;
 
-  if (!id) {
+  if (!id || !mongoose.isValidObjectId(id)) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "Session ID is required"));

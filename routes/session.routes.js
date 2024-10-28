@@ -9,7 +9,7 @@ import {
 const router = Router();
 
 router.route("/create").post(verifyJWT, createSession);
-router.route("/delete").post(verifyJWT, deleteSession);
+router.route("/delete/:id").delete(verifyJWT, deleteSession);
 router.route("/get-all").get(verifyJWT, getAllSessions);
 
 export default router;
