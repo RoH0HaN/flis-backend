@@ -1,5 +1,5 @@
 import { User } from "../models/user.models.js";
-import { ApiRes } from "../utils/api.response.js";
+import { ApiRes, validateFields } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -23,13 +23,13 @@ const validateEmail = (email) => {
 };
 
 const createUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
-  if (!email || !password || !name) {
-    return res
-      .status(400)
-      .json(
-        new ApiRes(400, null, "Email, Password, name and place is required")
-      );
+  const { name, email, password, role } = req.body;
+
+  if (
+    validateFields(req.body, ["name", "email", "password", "role"], res) !==
+    true
+  ) {
+    return;
   }
 
   try {
@@ -49,11 +49,12 @@ const createUser = asyncHandler(async (req, res) => {
       name: name,
       email: email,
       password: password,
+      role: role,
     });
 
     return res
       .status(200)
-      .json(new ApiRes(200, null, "user created successfully"));
+      .json(new ApiRes(201, null, "user created successfully"));
   } catch (error) {
     console.log(error);
 
@@ -63,10 +64,9 @@ const createUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return res
-      .status(400)
-      .json(new ApiRes(400, null, "Email and password is required"));
+
+  if (validateFields(req.body, ["email", "password"], res) !== true) {
+    return;
   }
 
   try {
@@ -196,11 +196,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  if (!oldPassword || !newPassword)
+  if (validateFields(req.body, ["oldPassword", "newPassword"], res) !== true) {
+    return;
+  }
+
+  if (oldPassword === newPassword)
     return res
       .status(400)
-      .json(new ApiRes(400, null, "Both old & new passwords are required."));
-
+      .json(new ApiRes(400, null, "New password cannot be the same as old."));
   try {
     const user = await User.findById(req.user?._id);
 
@@ -240,7 +243,7 @@ const changePassword = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiRes(201, {}, "Password changed successfully."));
+      .json(new ApiRes(200, null, "Password changed successfully."));
   } catch (error) {
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
@@ -249,7 +252,7 @@ const changePassword = asyncHandler(async (req, res) => {
 const getCurrentUserDetails = asyncHandler(async (req, res) => {
   const user = req.user;
   if (!user) {
-    return res.status(404).json(new ApiRes(404, null, "Unauthorized user"));
+    return res.status(404).json(new ApiRes(401, null, "Unauthorized user"));
   }
 
   try {

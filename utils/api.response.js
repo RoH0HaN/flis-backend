@@ -7,4 +7,25 @@ class ApiRes {
   }
 }
 
-export { ApiRes };
+function validateFields(body, requiredFields, res) {
+  const missingFields = requiredFields
+    .filter((field) => !body[field])
+    .map((field) => field);
+
+  if (missingFields.length > 0) {
+    return res
+      .status(400)
+      .json(
+        new ApiRes(
+          400,
+          null,
+          `Missing required fields: ${missingFields.join(", ")}`
+        )
+      );
+  }
+
+  // Return true if all fields are present
+  return true;
+}
+
+export { ApiRes, validateFields };

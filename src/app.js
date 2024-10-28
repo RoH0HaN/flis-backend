@@ -1,6 +1,8 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocs from "../configs/swagger.options.js";
 
 const corsOptions = {
   origin: process.env.CORS_ORIGIN,
@@ -11,6 +13,7 @@ const corsOptions = {
 const app = express();
 
 app.use(cors(corsOptions));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(express.json({ limit: "24kb" }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "24kb" }));
@@ -24,11 +27,15 @@ import admissionRoutes from "../routes/admission.routes.js";
 import feesRoutes from "../routes/fees.routes.js";
 import communicationRoutes from "../routes/communication.routes.js";
 import userRoutes from "../routes/user.routes.js";
+import classRoutes from "../routes/class.routes.js";
+import sessionRoutes from "../routes/session.routes.js";
 
 // -- Routes
 app.use(`${api_v1}/admission`, admissionRoutes);
 app.use(`${api_v1}/fees`, feesRoutes);
 app.use(`${api_v1}/communication`, communicationRoutes);
 app.use(`${api_v1}/user`, userRoutes);
+app.use(`${api_v1}/class`, classRoutes);
+app.use(`${api_v1}/session`, sessionRoutes);
 
 export { app };
