@@ -5,17 +5,17 @@ import {
   SCHOOL_ADDRESS,
   CONTACT_NUMBER,
 } from "../../src/constants.js";
+import { Logger } from "../logger.js";
 
-async function sendCounsellingEmail(
+async function sendPaymentConfirmationEmail(
   guardianName,
   guardianEmail,
-  studentName,
-  counsellingDate,
-  counsellingTime
+  applicationId
 ) {
   if (!guardianEmail) {
     throw new Error("Recipient email is required.");
   }
+
   // Nodemailer config
   let config = {
     service: "gmail",
@@ -45,31 +45,28 @@ async function sendCounsellingEmail(
       table: {
         data: [
           {
-            "Student Name": studentName,
-            "Counselling Date": counsellingDate,
-            "Counselling Time": counsellingTime,
-            Venue: SCHOOL_ADDRESS,
+            "Application ID": applicationId,
+            "Student Admission Form Fee": "500",
+            Status: "Paid",
           },
         ],
         columns: {
-          // Optionally customize column widths and alignment
           customWidth: {
-            "Student Name": "25%",
-            "Counselling Date": "25%",
-            "Counselling Time": "25%",
-            Venue: "25%",
+            "Application ID": "40%",
+            "Student Admission Form Fee": "30%",
+            Status: "30%",
           },
         },
       },
       action: {
-        instructions: `Please ensure that both you and the student are available at the scheduled time. Should you need any further information, feel free to contact us at ${CONTACT_NUMBER}.`,
+        instructions: `Thank you for completing the admission form for ${SCHOOL_NAME}. If you have any questions, please reach out to us at ${CONTACT_NUMBER}.`,
         button: {
-          color: "#22BC66", // Optional action button color
-          text: "View School Website",
+          color: "#22BC66",
+          text: "Visit School Website",
           link: "https://flisindia.com/",
         },
       },
-      outro: `We look forward to welcoming you and the student to our school community soon. If you have any further questions, feel free to reply to this email or call us directly.`,
+      outro: `We look forward to welcoming your child to our school!`,
     },
   };
 
@@ -81,9 +78,9 @@ async function sendCounsellingEmail(
   let mailOptions = {
     from: process.env.MAILER_EMAIL,
     to: guardianEmail,
-    subject: "Student Counselling Session Confirmation",
-    html: emailContent, // HTML email content
-    text: emailText, // Plain text version of the email
+    subject: "Admission Form Payment Confirmation",
+    html: emailContent,
+    text: emailText,
   };
 
   try {
@@ -98,4 +95,4 @@ async function sendCounsellingEmail(
   }
 }
 
-export { sendCounsellingEmail };
+export { sendPaymentConfirmationEmail };

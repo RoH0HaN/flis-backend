@@ -4,6 +4,7 @@ import admissionRoutes from "../docs/admission.swagger.js";
 import sessionRoutes from "../docs/session.swagger.js";
 import feesRoutes from "../docs/fees.swagger.js";
 import documentsRoutes from "../docs/document.swagger.js";
+import studentRoutes from "../docs/student.swagger.js";
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -46,6 +47,7 @@ This API provides secure, efficient, and well-documented endpoints to facilitate
     ...sessionRoutes.paths,
     ...feesRoutes.paths,
     ...documentsRoutes.paths,
+    ...studentRoutes.paths,
   },
   components: {
     securitySchemes: {
@@ -80,6 +82,10 @@ This API provides secure, efficient, and well-documented endpoints to facilitate
     {
       name: "Documents 📄",
       description: "All the API's regarding 'document'",
+    },
+    {
+      name: "Students 👨🏻‍🎓",
+      description: "All the API's regarding 'student'",
     },
   ],
 };

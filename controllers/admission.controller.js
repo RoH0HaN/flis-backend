@@ -4,7 +4,8 @@ import axios from "axios";
 import { ApiRes } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { uploadImageToFirebase } from "../utils/upload.images.firebase.js";
-import { application } from "express";
+import { sendPaymentConfirmationEmail } from "../utils/emails/send.payment.confirmation.email.js";
+import { Logger } from "../utils/logger.js";
 
 const generatePaymentLink = async (transaction_details, doc_id) => {
   const { MUID, transactionId, amount, name, mobile } = transaction_details;
@@ -42,7 +43,7 @@ const generatePaymentLink = async (transaction_details, doc_id) => {
 
     return response.data?.data?.instrumentResponse?.redirectInfo?.url || null;
   } catch (error) {
-    console.error("Error generating payment link:", error);
+    Logger(error, "error");
     return null;
   }
 };
@@ -103,7 +104,7 @@ const submitAdmissionFrom = asyncHandler(async (req, res) => {
         );
     }
   } catch (error) {
-    console.error("Error submitting admission form:", error);
+    Logger(error, "error");
     return res
       .status(500)
       .json(
@@ -137,13 +138,23 @@ const paymentVerification = asyncHandler(async (req, res) => {
     const { data } = await axios(options);
 
     if (data?.success === true) {
-      await Admission.findByIdAndUpdate(docId, { payment_status: "PAID" });
+      const application = await Admission.findById(docId);
+
+      application.payment_status = "PAID";
+
+      await sendPaymentConfirmationEmail(
+        application.parent_guardian_details.guardian_information.name,
+        application.parent_guardian_details.guardian_information.email,
+        application._id
+      );
+
+      await application.save();
       return res.redirect("http://localhost:3001");
     }
 
     return res.redirect("http://localhost:1250/error");
   } catch (error) {
-    console.error("Payment verification failed:", error);
+    Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
@@ -234,7 +245,7 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    console.error("Error getting applications:", error);
+    Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
@@ -246,7 +257,7 @@ const archiveApplication = asyncHandler(async (req, res) => {
     await Admission.findByIdAndUpdate(id, { application_status: "ARCHIVED" });
     return res.status(200).json(new ApiRes(200, null, "Application archived"));
   } catch (error) {
-    console.error("Error archiving application:", error);
+    Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
@@ -259,7 +270,7 @@ const getApplicationById = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiRes(200, application, "Application fetched successfully"));
   } catch (error) {
-    console.error("Error fetching application:", error);
+    Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });

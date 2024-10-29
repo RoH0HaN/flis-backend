@@ -7,6 +7,7 @@ const studentFeesSchema = new Schema(
     // Monthly fee breakdown
     monthlyFees: [
       {
+        name: { type: String, required: true },
         month: { type: String, required: true }, // e.g., "January", "February"
         baseAmount: { type: Number, required: true }, // Original amount due for this month
         discountAmount: { type: Number, default: 0 }, // Any discount applied this month
