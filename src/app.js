@@ -29,6 +29,7 @@ import communicationRoutes from "../routes/communication.routes.js";
 import userRoutes from "../routes/user.routes.js";
 import classRoutes from "../routes/class.routes.js";
 import sessionRoutes from "../routes/session.routes.js";
+import documentRoutes from "../routes/document.routes.js";
 
 // -- Routes
 app.use(`${api_v1}/admission`, admissionRoutes);
@@ -37,5 +38,6 @@ app.use(`${api_v1}/communication`, communicationRoutes);
 app.use(`${api_v1}/user`, userRoutes);
 app.use(`${api_v1}/class`, classRoutes);
 app.use(`${api_v1}/session`, sessionRoutes);
+app.use(`${api_v1}/document`, documentRoutes);
 
 export { app };

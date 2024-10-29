@@ -77,10 +77,10 @@ const previousInstituteSchema = new Schema({
 
 // Subschema for bank details
 const bankDetailsSchema = new Schema({
-  account_holder_name: { type: String, required: true },
-  bank_name: { type: String, required: true },
-  account_no: { type: String, required: true },
-  ifsc_code: { type: String, required: true },
+  account_holder_name: { type: String, default: "N/A" },
+  bank_name: { type: String, default: "N/A" },
+  account_no: { type: String, default: "N/A" },
+  ifsc_code: { type: String, default: "N/A" },
 });
 
 // Class schema to manage class details per session
@@ -94,15 +94,6 @@ const classSchema = new Schema({
 const sessionSchema = new Schema({
   year: { type: String, required: true }, // e.g., "2024-25"
   isActive: { type: Boolean, default: true }, // To easily filter current session
-});
-
-// Document schema for storing document metadata
-const documentSchema = new Schema({
-  student: { type: Schema.Types.ObjectId, ref: "Student", required: true },
-  document_type: { type: String, required: true }, // e.g., "ID Proof", "Report Card"
-  file_url: { type: String, required: true }, // URL to where the document is stored (S3, Google Cloud, etc.)
-  upload_date: { type: Date, default: Date.now },
-  description: { type: String }, // Optional, for additional info on the document
 });
 
 // Main Student schema
@@ -133,11 +124,15 @@ const studentSchema = new Schema(
         promoted: { type: Boolean, default: true },
       },
     ],
-    documents: [{ type: Schema.Types.ObjectId, ref: "Document" }],
+    applicationId: { type: Schema.Types.ObjectId, ref: "Admission" },
+    currentStatus: {
+      type: String,
+      enum: ["N/A", "EDITED", "UPLOADED", "SIGNED", "FEES", "COMPLETED"],
+      default: "N/A",
+    },
   },
   { timestamps: true }
 );
 
 // Models
-export const Document = model("Document", documentSchema);
 export const Student = model("Student", studentSchema);
