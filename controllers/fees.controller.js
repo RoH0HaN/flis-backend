@@ -278,7 +278,7 @@ const getAllMasters = asyncHandler(async (req, res) => {
 const getHeaderById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  if (!id) {
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "Fees header id is required"));
@@ -306,7 +306,14 @@ const getHeaderById = asyncHandler(async (req, res) => {
 const updateHeader = asyncHandler(async (req, res) => {
   const { id, name, feesCode, occurrence, dueDate, description } = req.body;
 
-  if (!id || !name || !feesCode || !occurrence || !dueDate) {
+  if (
+    !id ||
+    !name ||
+    !feesCode ||
+    !occurrence ||
+    !dueDate ||
+    !mongoose.Types.ObjectId.isValid(id)
+  ) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "All fields are required"));
@@ -338,7 +345,7 @@ const updateHeader = asyncHandler(async (req, res) => {
 const deleteHeader = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  if (!id) {
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "Fees header id is required"));

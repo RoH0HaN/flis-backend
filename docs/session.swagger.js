@@ -3,7 +3,7 @@ const sessionRoutes = {
     "{base_url}/api/v1/session/create": {
       post: {
         summary: "Create new session",
-        tags: ["Sessions 👩🏻‍🏫"],
+        tags: ["Sessions ⌚"],
         security: [
           {
             bearerAuth: [],
@@ -79,7 +79,7 @@ const sessionRoutes = {
     "{base_url}/api/v1/session/delete": {
       delete: {
         summary: "Delete a session",
-        tags: ["Sessions 👩🏻‍🏫"],
+        tags: ["Sessions ⌚"],
         security: [
           {
             bearerAuth: [],
@@ -115,7 +115,7 @@ const sessionRoutes = {
     "{base_url}/api/v1/session/get-all": {
       get: {
         summary: "Get all sessions",
-        tags: ["Sessions 👩🏻‍🏫"],
+        tags: ["Sessions ⌚"],
         security: [
           {
             bearerAuth: [],
