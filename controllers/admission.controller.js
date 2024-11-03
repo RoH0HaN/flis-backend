@@ -1,7 +1,8 @@
 import { Admission } from "../models/admission.model.js";
 import crypto from "crypto";
 import axios from "axios";
-import { ApiRes } from "../utils/api.response.js";
+import mongoose from "mongoose";
+import { ApiRes, validateFields } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { uploadImageToFirebase } from "../utils/upload.images.firebase.js";
 import { sendPaymentConfirmationEmail } from "../utils/emails/send.payment.confirmation.email.js";
@@ -162,6 +163,12 @@ const paymentVerification = asyncHandler(async (req, res) => {
 const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
   const { status } = req.params;
 
+  if (!status) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing status"));
+  }
+
   try {
     // Only retrieve necessary fields to optimize performance
     const applications = await Admission.find(
@@ -186,6 +193,12 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
         application_status: 1,
       }
     );
+
+    if (!applications) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "No applications found"));
+    }
 
     const applicationsList = applications.map((application) => {
       const {
@@ -252,7 +265,12 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
 
 const archiveApplication = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  console.log("Id: ", id);
+
+  if (!id || !mongoose.isValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing application ID"));
+  }
   try {
     await Admission.findByIdAndUpdate(id, { application_status: "ARCHIVED" });
     return res.status(200).json(new ApiRes(200, null, "Application archived"));
@@ -264,11 +282,62 @@ const archiveApplication = asyncHandler(async (req, res) => {
 
 const getApplicationById = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  if (!id || !mongoose.isValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing application ID"));
+  }
   try {
     const application = await Admission.findById(id);
+
+    if (!application) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Application not found"));
+    }
     return res
       .status(200)
       .json(new ApiRes(200, application, "Application fetched successfully"));
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const changeCounsellingStatus = asyncHandler(async (req, res) => {
+  const { id, status } = req.query;
+  if (!id || !mongoose.isValidObjectId(id)(id)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing application ID"));
+  }
+  if (validateFields(req.query, ["status"], res) !== true) {
+    return;
+  }
+  try {
+    const application = await Admission.findById(id);
+
+    if (!application) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Application not found"));
+    }
+    if (status === "APPROVED") {
+      application.application_status = "APPROVED";
+      application.counselling_status = "APPROVED";
+      application.counselling_time = null;
+      application.counselling_date = null;
+    } else if (status === "ARCHIVED") {
+      application.application_status = "ARCHIVED";
+      application.counselling_status = "ARCHIVED";
+      application.counselling_time = null;
+      application.counselling_date = null;
+    }
+
+    await application.save();
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Counselling status updated"));
   } catch (error) {
     Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
@@ -280,4 +349,5 @@ export {
   getApplicationsBasedOnStatus,
   archiveApplication,
   getApplicationById,
+  changeCounsellingStatus,
 };

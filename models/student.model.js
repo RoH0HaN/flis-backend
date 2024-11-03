@@ -85,7 +85,6 @@ const bankDetailsSchema = new Schema({
 
 // Class schema to manage class details per session
 const classSchema = new Schema({
-  session: { type: String, required: true }, // e.g., "2024-25"
   grade: { type: String, required: true }, // e.g., "4"
   section: { type: String }, // Optional, e.g., "A", "B"
 });

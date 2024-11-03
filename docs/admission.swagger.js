@@ -1,5 +1,3 @@
-import { application } from "express";
-
 const admissionRoutes = {
   paths: {
     "{base_url}/api/v1/admission/": {
@@ -430,7 +428,7 @@ const admissionRoutes = {
         ],
       },
     },
-    "/api/v1/admission/verify-payment": {
+    "{base_url}/api/v1/admission/verify-payment": {
       post: {
         summary: "Verify payment",
         tags: ["Admissions 👨‍🎓"],
@@ -508,7 +506,7 @@ const admissionRoutes = {
         },
       },
     },
-    "/api/v1/admission/get-applications/{status}": {
+    "{base_url}/api/v1/admission/get-applications/{status}": {
       get: {
         summary: "Get applications based on application status",
         tags: ["Admissions 👨‍🎓"],
@@ -625,7 +623,7 @@ const admissionRoutes = {
         },
       },
     },
-    "/api/v1/admission/archive-application/{id}": {
+    "{base_url}/api/v1/admission/archive-application/{id}": {
       delete: {
         summary: "Archive an application",
         tags: ["Admissions 👨‍🎓"],
@@ -658,7 +656,7 @@ const admissionRoutes = {
         },
       },
     },
-    "/api/v1/admission/get-application/{id}": {
+    "{base_url}/api/v1/admission/get-application/{id}": {
       get: {
         summary: "Get an application by Object ID",
         tags: ["Admissions 👨‍🎓"],
@@ -1083,6 +1081,57 @@ const admissionRoutes = {
           },
           401: {
             description: "Unauthorized request",
+          },
+          500: {
+            description: "Internal server error",
+          },
+        },
+      },
+    },
+    "{base_url}/api/v1/admission/change-counselling-status": {
+      put: {
+        summary: "Approve counselling",
+        tags: ["Admissions 👨‍🎓"],
+        consumes: ["application/json"],
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+        parameters: [
+          {
+            name: "id",
+            in: "query",
+            required: true,
+            description: "Application ID",
+            schema: {
+              type: "string",
+              example: "1234567890",
+            },
+          },
+          {
+            name: "status",
+            in: "query",
+            required: true,
+            description: "Counselling status",
+            schema: {
+              type: "string",
+              example: "APPROVED",
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Counselling approved successfully",
+          },
+          400: {
+            description: "Validation error",
+          },
+          401: {
+            description: "Unauthorized request",
+          },
+          404: {
+            description: "Application not found",
           },
           500: {
             description: "Internal server error",

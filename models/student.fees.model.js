@@ -1,62 +1,60 @@
-const studentFeesSchema = new Schema(
+import { Schema, model } from "mongoose";
+
+const StudentFeesSchema = new Schema(
   {
-    student: { type: Schema.Types.ObjectId, ref: "Student", required: true },
-    session: { type: Schema.Types.ObjectId, ref: "Session", required: true },
-    class: { type: Schema.Types.ObjectId, ref: "Class", required: true },
+    student: {
+      type: Schema.Types.ObjectId,
+      ref: "Student",
+      required: true,
+    },
+    session: {
+      year: { type: String, required: true },
+      isActive: { type: Boolean, default: true },
+    },
+    class: {
+      grade: { type: String, required: true },
+      section: { type: String },
+    },
+    feesMaster: {
+      type: Schema.Types.ObjectId,
+      ref: "FeesMaster",
+      required: true,
+    },
 
-    // Monthly fee breakdown
-    monthlyFees: [
-      {
-        name: { type: String, required: true },
-        month: { type: String, required: true }, // e.g., "January", "February"
-        baseAmount: { type: Number, required: true }, // Original amount due for this month
-        discountAmount: { type: Number, default: 0 }, // Any discount applied this month
-        finalAmount: { type: Number, required: true }, // After discount: baseAmount - discountAmount
+    fees: {
+      type: [
+        {
+          name: { type: String, required: true },
+          feesCode: { type: String, required: true },
+          occurrence: { type: String, required: true },
+          amount: { type: Number, required: true },
+          discountAmount: { type: Number, default: 0 },
+          finalAmount: { type: Number, required: true },
+          dueDate: { type: Date, required: true },
+          paidAmount: { type: Number, default: 0 },
 
-        paidAmount: { type: Number, default: 0 }, // Track payments for this month
-        dueAmount: {
-          type: Number,
-          default: function () {
-            return this.finalAmount;
+          paymentStatus: {
+            type: String,
+            enum: ["PAID", "PARTIALLY_PAID", "UNPAID"],
+            default: "UNPAID",
           },
-        }, // Tracks remaining due
-
-        paymentStatus: {
-          type: String,
-          enum: ["PAID", "PARTIALLY_PAID", "UNPAID"],
-          default: "UNPAID",
-        },
-
-        dueDate: { type: Date, required: true }, // Due date for this month's fee
-
-        // Payment history for this specific month
-        paymentHistory: [
-          {
-            amountPaid: { type: Number, required: true },
-            paymentDate: { type: Date, default: Date.now },
-            paymentMethod: {
-              type: String,
-              enum: ["CASH", "CARD", "ONLINE"],
-              default: "CASH",
+          paymentHistory: [
+            {
+              amountPaid: { type: Number, required: true },
+              paymentDate: { type: Date, default: Date.now },
+              paymentMethod: {
+                type: String,
+                enum: ["CASH", "CARD", "ONLINE"],
+                default: "CASH",
+              },
+              transactionId: { type: String },
             },
-            transactionId: { type: String },
-          },
-        ],
-      },
-    ],
-
-    // Total amounts for all months combined
-    totalBaseAmount: { type: Number, required: true },
-    totalDiscountAmount: { type: Number, default: 0 },
-    totalFinalAmount: { type: Number, required: true }, // After all discounts
-
+          ],
+        },
+      ],
+    },
+    totalFinalAmount: { type: Number, required: true },
     totalPaidAmount: { type: Number, default: 0 },
-    totalDueAmount: {
-      type: Number,
-      default: function () {
-        return this.totalFinalAmount;
-      },
-    }, // Overall due amount
 
     overallPaymentStatus: {
       type: String,
@@ -67,4 +65,19 @@ const studentFeesSchema = new Schema(
   { timestamps: true }
 );
 
-export const StudentFees = model("StudentFees", studentFeesSchema);
+// Middleware to calculate totalPaidAmount, overallPaymentStatus
+StudentFeesSchema.pre("save", function (next) {
+  this.totalPaidAmount = this.fees.reduce(
+    (sum, fee) => sum + fee.paidAmount,
+    0
+  );
+  this.overallPaymentStatus =
+    this.totalPaidAmount >= this.totalFinalAmount
+      ? "PAID"
+      : this.totalPaidAmount > 0
+        ? "PARTIALLY_PAID"
+        : "UNPAID";
+  next();
+});
+
+export const StudentFees = model("StudentFees", StudentFeesSchema);
