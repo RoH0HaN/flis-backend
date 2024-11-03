@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import Mailgen from "mailgen";
+import { Logger } from "../logger.js";
 import {
   SCHOOL_NAME,
   SCHOOL_ADDRESS,
