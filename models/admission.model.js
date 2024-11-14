@@ -3,15 +3,24 @@ import { Schema, model } from "mongoose";
 // Subschema for personal details
 const personalDetailsSchema = new Schema({
   first_name: { type: String, required: true },
+  middle_name: { type: String, required: true },
   last_name: { type: String, required: true },
   date_of_birth: { type: Date, required: true },
-  class: { type: String, required: true },
-  gender: { type: String, required: true },
-  religion: { type: String, required: true },
+  birth_certificate_number: { type: Date, required: true },
+  birth_place: { type: Date, required: true },
   caste: { type: String, required: true },
-  hobbies: { type: String, default: "N/A" },
-  talent: { type: String, default: "N/A" },
+  caste_certificate_number: { type: String, default: "N/A" },
+  class: { type: boolean, required: true },
+  is_specially_abled: { type: String, required: true },
+  pwd_certificate_number: { type: String, default: "N/A" },
+  language_spoken_at_home: { type: String, required: true },
+  aadhaar_number: { type: String, default: "N/A" },
+  academic_era: { type: String, required: true },
   student_photo: { type: String, required: true },
+  mother_tongue: { type: String, required: true },
+  religion: { type: String, required: true },
+  gender: { type: String, required: true },
+  hobbies: { type: String, default: "N/A" },
 });
 
 // Subschema for contact information
@@ -19,6 +28,10 @@ const contactInfoSchema = new Schema({
   name: { type: String, required: true },
   occupation: { type: String, required: true },
   contact_no: { type: String, required: true },
+  annual_income: { type: String, required: true },
+  whatsapp_no: { type: String, default: "N/A" },
+  email: { type: String, default: "N/A" },
+  qualification: { type: String },
 });
 
 // Subschema for guardian details
@@ -69,6 +82,12 @@ const medicalDetailsSchema = new Schema({
 
 // Subschema for previous institution details
 const previousInstituteSchema = new Schema({
+  previous_section: { type: String, default: "N/A" },
+  previous_roll_no: { type: String, default: "N/A" },
+  previous_portal_id: { type: String, default: "N/A" },
+  previous_from_date: { type: String, default: "N/A" },
+  previous_to_date: { type: String, default: "N/A" },
+  reason_for_leaving: { type: String, default: "N/A" },
   institute_name: { type: String, default: "N/A" },
   board_affiliation: { type: String, default: "N/A" },
   previous_class: { type: String, default: "N/A" },

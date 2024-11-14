@@ -6,12 +6,16 @@ import { ApiRes, validateFields } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { uploadImageToFirebase } from "../utils/upload.images.firebase.js";
 import { sendPaymentConfirmationEmail } from "../utils/emails/send.payment.confirmation.email.js";
+import { generateAdmissionReceipt } from "../utils/pdf/generate.admission.payment.receipt.js";
 import { Logger } from "../utils/logger.js";
+import { v4 as uuidv4 } from "uuid";
 
 const generatePaymentLink = async (transaction_details, doc_id) => {
-  const { MUID, transactionId, amount, name, mobile } = transaction_details;
+  const { amount, name, mobile } = transaction_details;
 
   try {
+    const transactionId = uuidv4();
+
     const data = {
       merchantId: process.env.MERCHANT_ID,
       merchantTransactionId: transactionId,
@@ -27,6 +31,10 @@ const generatePaymentLink = async (transaction_details, doc_id) => {
     const string = payloadMain + "/pg/v1/pay" + process.env.SALT_KEY;
     const checksum =
       crypto.createHash("sha256").update(string).digest("hex") + "###1";
+
+    console.log("Data to be sent:", data);
+    console.log("Base64 Encoded Payload:", payloadMain);
+    console.log("Generated Checksum (X-VERIFY):", checksum);
 
     const response = await axios.post(
       `${process.env.PG_TESTING_URL}/pay`,
@@ -143,10 +151,22 @@ const paymentVerification = asyncHandler(async (req, res) => {
 
       application.payment_status = "PAID";
 
-      await sendPaymentConfirmationEmail(
+      const receiptPath = await generateAdmissionReceipt({
+        applicationId: application._id.toString(),
+        studentName: `${application.student_details.first_name} ${application.student_details.last_name}`,
+        motherName: application.parent_guardian_details.mother_information.name,
+        fatherName: application.parent_guardian_details.father_information.name,
+        class: application.student_details.class,
+        receivedAmount: "₹500", //fixed amount might changed later
+        transactionId: data.data?.transactionId,
+        amountInWords: "Five Hundred Rupees Only",
+      });
+
+      sendPaymentConfirmationEmail(
         application.parent_guardian_details.guardian_information.name,
         application.parent_guardian_details.guardian_information.email,
-        application._id
+        application._id,
+        receiptPath
       );
 
       await application.save();
@@ -306,7 +326,7 @@ const getApplicationById = asyncHandler(async (req, res) => {
 
 const changeCounsellingStatus = asyncHandler(async (req, res) => {
   const { id, status } = req.query;
-  if (!id || !mongoose.isValidObjectId(id)(id)) {
+  if (!id || !mongoose.isValidObjectId(id)) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "Invalid or missing application ID"));

@@ -1,5 +1,7 @@
 import { Student } from "../models/student.model.js";
 import { ApiRes, validateFields } from "../utils/api.response.js";
+import { uploadImageToFirebase } from "../utils/upload.images.firebase.js";
+import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { Logger } from "../utils/logger.js";
 import mongoose from "mongoose";
@@ -67,6 +69,21 @@ const createStudent = asyncHandler(async (req, res) => {
   }
 
   try {
+    const student = await Student.findOne({ applicationId: application_id });
+    if (student) {
+      return res
+        .status(400)
+        .json(new ApiRes(400, null, "Student already exists"));
+    }
+    if (req.file) {
+      await deleteFromFirebase(student_details.student_photo);
+
+      student_details.student_photo = await uploadImageToFirebase(
+        req.file.path,
+        "student_image"
+      );
+    }
+
     const newStudent = new Student({
       applicationId: application_id,
       student_details,
