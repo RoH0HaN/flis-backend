@@ -10,7 +10,7 @@ const personalDetailsSchema = new Schema({
   birth_place: { type: Date, required: true },
   caste: { type: String, required: true },
   caste_certificate_number: { type: String, default: "N/A" },
-  class: { type: boolean, required: true },
+  class: { type: String, required: true },
   is_specially_abled: { type: String, required: true },
   pwd_certificate_number: { type: String, default: "N/A" },
   language_spoken_at_home: { type: String, required: true },
