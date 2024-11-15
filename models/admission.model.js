@@ -59,7 +59,7 @@ const addressSchema = new Schema({
 
 // Subschema for medical details
 const medicalDetailsSchema = new Schema({
-  blood_group: { type: String, required: true },
+  blood_group: { type: String, default: "N/A" },
   allergies: {
     status: { type: Boolean, default: false },
     details: { type: String, default: "N/A" },
@@ -76,8 +76,8 @@ const medicalDetailsSchema = new Schema({
     status: { type: Boolean, default: false },
     details: { type: String, default: "N/A" },
   },
-  height: { type: String, required: true },
-  weight: { type: String, required: true },
+  height: { type: String, default: "N/A" },
+  weight: { type: String, default: "N/A" },
 });
 
 // Subschema for previous institution details
