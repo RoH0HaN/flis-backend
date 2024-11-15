@@ -3,11 +3,11 @@ import { Schema, model } from "mongoose";
 // Subschema for personal details
 const personalDetailsSchema = new Schema({
   first_name: { type: String, required: true },
-  middle_name: { type: String, required: true },
+  middle_name: { type: String, required: false },
   last_name: { type: String, required: true },
   date_of_birth: { type: Date, required: true },
-  birth_certificate_number: { type: Date, required: true },
-  birth_place: { type: Date, required: true },
+  birth_certificate_number: { type: String, required: true },
+  birth_place: { type: String, required: true },
   caste: { type: String, required: true },
   caste_certificate_number: { type: String, default: "N/A" },
   class: { type: String, required: true },
