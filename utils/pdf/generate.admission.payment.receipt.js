@@ -40,7 +40,7 @@ async function generateAdmissionReceipt(data) {
     content: [
       {
         image: path.join(__dirname, "../../public/assets/doc_header.jpg"),
-        width: 450,
+        width: 530,
         alignment: "center",
         margin: [0, 0, 0, 20],
       },

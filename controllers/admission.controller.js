@@ -146,30 +146,35 @@ const paymentVerification = asyncHandler(async (req, res) => {
 
     const { data } = await axios(options);
 
-    if (data?.success === true) {
+    if (data.data.responseCode === "SUCCESS") {
       const application = await Admission.findById(docId);
 
       application.payment_status = "PAID";
 
-      const receiptPath = await generateAdmissionReceipt({
+      // Prepare tasks
+      const receiptTask = generateAdmissionReceipt({
         applicationId: application._id.toString(),
         studentName: `${application.student_details.first_name} ${application.student_details.last_name}`,
         motherName: application.parent_guardian_details.mother_information.name,
         fatherName: application.parent_guardian_details.father_information.name,
         class: application.student_details.class,
-        receivedAmount: "₹500", //fixed amount might changed later
+        receivedAmount: "₹500", // fixed amount, might change later
         transactionId: data.data?.transactionId,
         amountInWords: "Five Hundred Rupees Only",
       });
 
-      sendPaymentConfirmationEmail(
+      const emailTask = sendPaymentConfirmationEmail(
         application.parent_guardian_details.guardian_information.name,
         application.parent_guardian_details.guardian_information.email,
         application._id,
-        receiptPath
+        await receiptTask // Await here since email depends on receipt.
       );
 
-      await application.save();
+      const saveApplicationTask = application.save();
+
+      // Execute all tasks concurrently
+      await Promise.all([receiptTask, emailTask, saveApplicationTask]);
+
       return res.redirect("http://localhost:3001");
     }
 
