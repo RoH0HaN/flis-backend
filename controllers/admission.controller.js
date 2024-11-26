@@ -71,7 +71,7 @@ const submitAdmissionFrom = asyncHandler(async (req, res) => {
 
     const studentPhotoUrl = await uploadImageToFirebase(
       req.file.path,
-      "student_image"
+      "student_images"
     );
     student_details.student_photo = studentPhotoUrl;
 
@@ -151,7 +151,7 @@ const updateApplication = asyncHandler(async (req, res) => {
     if (req.file) {
       const studentPhotoUrl = await uploadImageToFirebase(
         req.file.path,
-        "changed_image"
+        "student_images"
       );
       student_details.student_photo = studentPhotoUrl;
 
