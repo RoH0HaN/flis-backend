@@ -448,7 +448,9 @@ const deleteAdmission = asyncHandler(async (req, res) => {
   }
   try {
     // delete data
-    const application = await Admission.findById(id).select("_id");
+    const application = await Admission.findById(id).select(
+      "_id student_details"
+    );
 
     if (!application) {
       return res
