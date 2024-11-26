@@ -183,11 +183,7 @@ const updateApplication = asyncHandler(async (req, res) => {
       .json(new ApiRes(200, null, "Admission updated successfully"));
   } catch (error) {
     Logger(error, "error");
-    return res
-      .status(500)
-      .json(
-        new ApiRes(500, null, "An error occurred while submitting the form.")
-      );
+    return res.status(500).json(new ApiRes(500, null, "Internal server error"));
   }
 });
 
