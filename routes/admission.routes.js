@@ -8,6 +8,8 @@ import {
   archiveApplication,
   getApplicationById,
   changeCounsellingStatus,
+  deleteAdmission,
+  updateApplication,
 } from "../controllers/admission.controller.js";
 
 const router = Router();
@@ -22,5 +24,10 @@ router.route("/get-application/:id").get(verifyJWT, getApplicationById);
 router
   .route("/change-counselling-status")
   .put(verifyJWT, changeCounsellingStatus);
+router.route("/delete/:id").delete(verifyJWT, deleteAdmission);
+
+router
+  .route("/update/:id")
+  .put(upload.single("student_image"), updateApplication);
 
 export default router;

@@ -9,6 +9,7 @@ import { sendPaymentConfirmationEmail } from "../utils/emails/send.payment.confi
 import { generateAdmissionReceipt } from "../utils/pdf/generate.admission.payment.receipt.js";
 import { Logger } from "../utils/logger.js";
 import { v4 as uuidv4 } from "uuid";
+import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
 
 const generatePaymentLink = async (transaction_details, doc_id) => {
   const { amount, name, mobile } = transaction_details;
@@ -112,6 +113,74 @@ const submitAdmissionFrom = asyncHandler(async (req, res) => {
           )
         );
     }
+  } catch (error) {
+    Logger(error, "error");
+    return res
+      .status(500)
+      .json(
+        new ApiRes(500, null, "An error occurred while submitting the form.")
+      );
+  }
+});
+
+const updateApplication = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+
+  if (!id || !mongoose.isValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing admission ID"));
+  }
+
+  try {
+    const admission = await Admission.findById(id);
+
+    if (!admission) {
+      return res.status(404).json(new ApiRes(404, null, "Admission not found"));
+    }
+
+    const {
+      student_details,
+      parent_guardian_details,
+      communication_address,
+      other_details,
+      bank_details,
+    } = req.body;
+
+    // Check if a new student photo is provided
+    if (req.file) {
+      const studentPhotoUrl = await uploadImageToFirebase(
+        req.file.path,
+        "student_image"
+      );
+      student_details.student_photo = studentPhotoUrl;
+
+      // delete the previous photo from firebase storage
+      const deleted = await deleteFromFirebase(
+        admission.student_details.student_photo
+      );
+
+      if (!deleted) {
+        Logger(
+          "Failed to delete the previous photo from firebase storage",
+          "error"
+        );
+      }
+    }
+
+    // Update the admission document
+    admission.student_details = student_details;
+    admission.parent_guardian_details = parent_guardian_details;
+    admission.communication_address = communication_address;
+    admission.other_details = other_details;
+    admission.bank_details = bank_details;
+
+    // Save the updated admission document
+    await admission.save();
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Admission updated successfully"));
   } catch (error) {
     Logger(error, "error");
     return res
@@ -368,6 +437,52 @@ const changeCounsellingStatus = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
+
+const deleteAdmission = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+
+  if (!id || !mongoose.isValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing application ID"));
+  }
+  try {
+    // delete data
+    const application = await Admission.findById(id).select("_id");
+
+    if (!application) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Application not found"));
+    }
+
+    // delete from firebase
+    const fileUrl = application.student_details.student_photo;
+
+    const deleted = await deleteFromFirebase(fileUrl);
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json(
+          new ApiRes(
+            404,
+            null,
+            "Something went wrong while deleting student photo"
+          )
+        );
+    }
+
+    await Admission.findByIdAndDelete(id);
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Application deleted successfully"));
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
 export {
   submitAdmissionFrom,
   paymentVerification,
@@ -375,4 +490,6 @@ export {
   archiveApplication,
   getApplicationById,
   changeCounsellingStatus,
+  deleteAdmission,
+  updateApplication,
 };
