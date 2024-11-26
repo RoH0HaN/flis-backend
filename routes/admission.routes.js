@@ -28,6 +28,6 @@ router.route("/delete/:id").delete(verifyJWT, deleteAdmission);
 
 router
   .route("/update/:id")
-  .put(upload.single("student_image"), updateApplication);
+  .put(upload.single("changed_image"), updateApplication);
 
 export default router;
