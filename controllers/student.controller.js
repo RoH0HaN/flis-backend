@@ -1,7 +1,5 @@
 import { Student } from "../models/student.model.js";
 import { ApiRes, validateFields } from "../utils/api.response.js";
-import { uploadImageToFirebase } from "../utils/upload.images.firebase.js";
-import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { Logger } from "../utils/logger.js";
 import mongoose from "mongoose";
@@ -41,7 +39,7 @@ const handleCreateOrUpdateStudent = async ({
   const student = await Student.findOne({ applicationId: application_id });
   if (student) {
     Object.assign(student, updateFields);
-    // student.currentStatus = "EDITED"; // Ensure status is updated if applicable
+    student.currentStatus = currentStatus || "EDITED"; // Ensure status is updated if applicable
     await student.save();
     return { message: "Student updated successfully", studentId: student._id };
   }
