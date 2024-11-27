@@ -49,6 +49,7 @@ const handleCreateOrUpdateStudent = async ({
     ...updateFields,
   });
 
+  newStudent.admission_date = new Date();
   newStudent.currentStatus = "EDITED";
   await newStudent.save();
 
