@@ -5,6 +5,7 @@ import { uploadPdfToFirebase } from "../utils/upload.pdf.firebase.js";
 import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
 import { Logger } from "../utils/logger.js";
 import mongoose from "mongoose";
+import { Student } from "../models/student.model.js";
 
 const createDocument = asyncHandler(async (req, res) => {
   const { student, documentType, description } = req.body;
@@ -21,6 +22,17 @@ const createDocument = asyncHandler(async (req, res) => {
   }
 
   try {
+    const document = await Document.findOne({
+      student: student,
+      documentType: documentType,
+    });
+
+    if (document) {
+      return res
+        .status(400)
+        .json(new ApiRes(400, null, "Document already exists"));
+    }
+
     const documentUrl = await uploadPdfToFirebase(
       req.file.path,
       "documents",
