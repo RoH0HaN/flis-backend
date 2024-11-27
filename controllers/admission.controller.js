@@ -10,6 +10,7 @@ import { generateAdmissionReceipt } from "../utils/pdf/generate.admission.paymen
 import { Logger } from "../utils/logger.js";
 import { v4 as uuidv4 } from "uuid";
 import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
+import { handleCreateOrUpdateStudent } from "./student.controller.js";
 
 const generatePaymentLink = async (transaction_details, doc_id) => {
   const { amount, name, mobile } = transaction_details;
@@ -178,9 +179,18 @@ const updateApplication = asyncHandler(async (req, res) => {
     // Save the updated admission document
     await admission.save();
 
+    const { message, studentId } = await handleCreateOrUpdateStudent({
+      application_id: id,
+      student_details,
+      parent_guardian_details,
+      communication_address,
+      other_details,
+      bank_details,
+    });
+
     return res
       .status(200)
-      .json(new ApiRes(200, null, "Admission updated successfully"));
+      .json(new ApiRes(200, studentId, `Admission updated and ${message}`));
   } catch (error) {
     Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, "Internal server error"));

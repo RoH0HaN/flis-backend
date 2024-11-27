@@ -138,4 +138,4 @@ const createStudent = asyncHandler(async (req, res) => {
   }
 });
 
-export { getCurrentStatus, createStudent };
+export { getCurrentStatus, createStudent, handleCreateOrUpdateStudent };
