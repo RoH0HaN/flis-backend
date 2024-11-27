@@ -83,18 +83,6 @@ const bankDetailsSchema = new Schema({
   ifsc_code: { type: String, default: "N/A" },
 });
 
-// Class schema to manage class details per session
-const classSchema = new Schema({
-  grade: { type: String, required: true }, // e.g., "4"
-  section: { type: String }, // Optional, e.g., "A", "B"
-});
-
-// Session schema to track academic sessions
-const sessionSchema = new Schema({
-  year: { type: String, required: true }, // e.g., "2024-25"
-  isActive: { type: Boolean, default: true }, // To easily filter current session
-});
-
 // Main Student schema
 const studentSchema = new Schema(
   {
@@ -114,19 +102,46 @@ const studentSchema = new Schema(
     },
     bank_details: bankDetailsSchema,
     admission_date: { type: Date, required: true },
-    class_info: classSchema,
-    session: sessionSchema,
+    class_info: {
+      type: Schema.Types.ObjectId,
+      ref: "Class",
+      required: true,
+    },
+    section_info: {
+      type: Schema.Types.ObjectId,
+      ref: "Section",
+      required: true,
+    },
+    session: {
+      type: Schema.Types.ObjectId,
+      ref: "Session",
+      required: true,
+    },
     promotion_history: [
       {
-        session: sessionSchema,
-        grade: String,
+        session: {
+          type: Schema.Types.ObjectId,
+          ref: "Session",
+          required: true,
+        },
+        class_info: {
+          type: Schema.Types.ObjectId,
+          ref: "Class",
+          required: true,
+        },
+        section_info: {
+          type: Schema.Types.ObjectId,
+          ref: "Section",
+          required: true,
+        },
         promoted: { type: Boolean, default: true },
+        date: { type: Date, default: Date.now },
       },
     ],
     applicationId: { type: Schema.Types.ObjectId, ref: "Admission" },
     currentStatus: {
       type: String,
-      enum: ["N/A", "EDITED", "UPLOADED", "SIGNED", "FEES", "COMPLETED"],
+      enum: ["N/A", "EDITED", "FEES", "SIGNED", "UPLOADED", "COMPLETED"],
       default: "N/A",
     },
   },
