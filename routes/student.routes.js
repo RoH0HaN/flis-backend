@@ -8,7 +8,7 @@ import {
 
 const router = Router();
 
-router.route("/create").post(verifyJWT, createStudent);
+router.route("/create/:application_id").post(verifyJWT, createStudent);
 router
   .route("/get-current-status/:application_id")
   .get(verifyJWT, getCurrentStatus);
