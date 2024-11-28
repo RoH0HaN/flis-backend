@@ -4,9 +4,9 @@ import { Schema, model } from "mongoose";
 const sectionSchema = new Schema(
   {
     name: { type: String, required: true }, // e.g., "A", "B"
-    class: { type: Schema.Types.ObjectId, ref: "Class", required: true }, // Reference to Class
+    classId: { type: Schema.Types.ObjectId, ref: "Class", required: true }, // Reference to Class
     maxStudents: { type: Number, required: true }, // Max students allowed in the section
-    totalStudents: { type: Number, default: 0 }, // Current number of enrolled students
+    currStudents: { type: Number, default: 0 }, // Current number of enrolled students
   },
   { timestamps: true }
 );
@@ -16,6 +16,9 @@ const classSchema = new Schema(
   {
     name: { type: String, required: true, unique: true }, // e.g., "Class 4", "Class 10"
     sections: [{ type: Schema.Types.ObjectId, ref: "Section" }], // Array of Section references
+    minAge: { type: Number, required: true },
+    maxAge: { type: Number, required: true },
+    feesMasters: [{ type: Schema.Types.ObjectId, ref: "FeesMaster" }],
     description: { type: String, default: "N/A" },
   },
   { timestamps: true }

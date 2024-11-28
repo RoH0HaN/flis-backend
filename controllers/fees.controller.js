@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import { FeesHeader, FeesGroup, FeesMaster } from "../models/fees.model.js";
 import { ApiRes } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
@@ -217,7 +218,7 @@ const addHeaderToMaster = asyncHandler(async (req, res) => {
     }
 
     headers.forEach((header) => {
-      master.headers.push({ header, amount: 0 });
+      master.headers.push({ header: header.header, amount: 0 });
     });
 
     await master.save();
@@ -278,7 +279,7 @@ const getAllMasters = asyncHandler(async (req, res) => {
 const getHeaderById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+  if (!id || !isValidObjectId(id)) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "Fees header id is required"));
@@ -312,7 +313,7 @@ const updateHeader = asyncHandler(async (req, res) => {
     !feesCode ||
     !occurrence ||
     !dueDate ||
-    !mongoose.Types.ObjectId.isValid(id)
+    !isValidObjectId(id)
   ) {
     return res
       .status(400)
@@ -345,7 +346,7 @@ const updateHeader = asyncHandler(async (req, res) => {
 const deleteHeader = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+  if (!id || !isValidObjectId(id)) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "Fees header id is required"));

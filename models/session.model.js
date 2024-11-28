@@ -2,10 +2,10 @@ import { Schema, model } from "mongoose";
 
 const sessionSchema = new Schema(
   {
-    year: { type: String, required: true }, // e.g., "2024-2025"
+    name: { type: String, required: true },
     startDate: { type: String, required: true },
     endDate: { type: String, required: true },
-    isActive: { type: Boolean, default: true }, // To mark the current active session
+    isActive: { type: Boolean, default: false }, // To mark the current active session
   },
   { timestamps: true }
 );
