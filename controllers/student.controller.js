@@ -1,8 +1,56 @@
+import { Admission } from "../models/admission.model.js";
+import { Section } from "../models/class.model.js";
 import { Student } from "../models/student.model.js";
 import { ApiRes, validateFields } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { Logger } from "../utils/logger.js";
 import mongoose from "mongoose";
+
+const handleCreateStudent = async ({
+  application_id,
+  student_details,
+  parent_guardian_details,
+  communication_address,
+  other_details,
+  bank_details,
+  class_info,
+  section_info,
+  session_info,
+}) => {
+  if (!application_id || !mongoose.isValidObjectId(application_id)) {
+    return {
+      message: "Application ID is required",
+      studentId: "",
+    };
+  }
+
+  const student = await Student.findOne({ applicationId: application_id });
+
+  if (student) {
+    return {
+      message: "Student already exists with this application ID",
+      studentId: student._id,
+    };
+  }
+
+  const newStudent = new Student({
+    applicationId: application_id,
+    student_details,
+    parent_guardian_details,
+    communication_address,
+    other_details,
+    bank_details,
+    class_info,
+    section_info,
+    session_info,
+  });
+
+  newStudent.admission_date = new Date();
+  newStudent.currentStatus = "EDITED";
+  await newStudent.save();
+
+  return { message: "Student created successfully", studentId: newStudent._id };
+};
 
 const handleCreateOrUpdateStudent = async ({
   application_id,
@@ -11,14 +59,19 @@ const handleCreateOrUpdateStudent = async ({
   communication_address,
   other_details,
   bank_details,
-  admission_date,
   class_info,
+  section_info,
   session,
+  fees_info,
+  admission_date,
   promotion_history,
   currentStatus,
 }) => {
   if (!application_id || !mongoose.isValidObjectId(application_id)) {
-    throw new Error("Application ID is required");
+    return {
+      message: "Application ID is required",
+      studentId: "",
+    };
   }
 
   const updateFields = {};
@@ -32,6 +85,7 @@ const handleCreateOrUpdateStudent = async ({
   if (bank_details) updateFields.bank_details = bank_details;
   if (admission_date) updateFields.admission_date = admission_date;
   if (class_info) updateFields.class_info = class_info;
+  if (section_info) updateFields.section_info = section_info;
   if (session) updateFields.session = session;
   if (promotion_history) updateFields.promotion_history = promotion_history;
   if (currentStatus) updateFields.currentStatus = currentStatus;
@@ -39,7 +93,6 @@ const handleCreateOrUpdateStudent = async ({
   const student = await Student.findOne({ applicationId: application_id });
   if (student) {
     Object.assign(student, updateFields);
-    student.currentStatus = currentStatus || "EDITED"; // Ensure status is updated if applicable
     await student.save();
     return { message: "Student updated successfully", studentId: student._id };
   }
@@ -52,6 +105,11 @@ const handleCreateOrUpdateStudent = async ({
   newStudent.admission_date = new Date();
   newStudent.currentStatus = "EDITED";
   await newStudent.save();
+
+  const section = await Section.findById(section_info);
+
+  section.currStudents += 1;
+  await section.save();
 
   return { message: "Student created successfully", studentId: newStudent._id };
 };
@@ -92,8 +150,9 @@ const createStudent = asyncHandler(async (req, res) => {
     communication_address,
     other_details,
     bank_details,
-    // class_info,
-    // session,
+    class_info,
+    section_info,
+    session,
   } = req.body;
 
   if (!application_id || !mongoose.isValidObjectId(application_id)) {
@@ -111,8 +170,9 @@ const createStudent = asyncHandler(async (req, res) => {
         "communication_address",
         "other_details",
         "bank_details",
-        // "class_info",
-        // "session",
+        "class_info",
+        "section_info",
+        "session",
       ],
       res
     ) !== true
@@ -121,6 +181,14 @@ const createStudent = asyncHandler(async (req, res) => {
   }
 
   try {
+    const admission = await Admission.findById(application_id).select("_id");
+
+    if (!admission) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Admission not found with this ID"));
+    }
+
     const { message, studentId } = await handleCreateOrUpdateStudent({
       application_id,
       student_details,
@@ -128,6 +196,9 @@ const createStudent = asyncHandler(async (req, res) => {
       communication_address,
       other_details,
       bank_details,
+      class_info,
+      section_info,
+      session,
     });
 
     return res.status(200).json(new ApiRes(200, studentId, message));
@@ -137,4 +208,9 @@ const createStudent = asyncHandler(async (req, res) => {
   }
 });
 
-export { getCurrentStatus, createStudent, handleCreateOrUpdateStudent };
+export {
+  getCurrentStatus,
+  createStudent,
+  handleCreateOrUpdateStudent,
+  handleCreateStudent,
+};

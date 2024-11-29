@@ -9,6 +9,7 @@ import {
   addHeaderToMaster,
   getAllHeaders,
   getAllGroups,
+  getAllGroupsForDropdown,
   getAllMasters,
   getHeaderById,
   updateHeader,
@@ -28,6 +29,7 @@ router.route("/header/update").put(updateHeader);
 router.route("/header/delete/:id").delete(deleteHeader);
 router.route("/group/create").post(createFeesGroup);
 router.route("/group/get-all").get(getAllGroups);
+router.route("/group/get-all-for-dropdown").get(getAllGroupsForDropdown);
 router.route("/group/get/:id").get(getGroupById);
 router.route("/group/update").put(updateGroup);
 router.route("/group/delete/:id").delete(deleteGroup);

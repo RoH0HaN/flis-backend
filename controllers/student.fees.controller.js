@@ -6,6 +6,85 @@ import { asyncHandler } from "../utils/async.handler.js";
 import { Logger } from "../utils/logger.js";
 import mongoose from "mongoose";
 
+const handleCreateFees = async ({
+  studentId,
+  fees_info,
+  class_info,
+  session_info,
+}) => {
+  if (!studentId || !mongoose.isValidObjectId(studentId)) {
+    return {
+      feeMassage: "Student ID is required",
+    };
+  }
+  // console.log(studentId, fees_info, class_info, session_info);
+
+  try {
+    let returnId = "";
+    for (const item of fees_info) {
+      const feesMaster = await FeesMaster.findOne({
+        group: item,
+      }).populate({
+        path: "headers.header",
+      });
+
+      if (!feesMaster) return;
+
+      const studentFees = await StudentFees.findOne({
+        student: studentId,
+        feesMaster: feesMaster._id,
+      });
+      if (studentFees) {
+        studentFees.fees = feesMaster.headers.map((item) => ({
+          name: item.header.name,
+          feesCode: item.header.feesCode,
+          occurrence: item.header.occurrence,
+          amount: item.amount,
+          discountAmount: 0,
+          finalAmount: item.amount,
+          dueDate: item.header.dueDate,
+          paidAmount: 0,
+        }));
+
+        studentFees.totalFinalAmount = feesMaster.headers.reduce(
+          (sum, item) => sum + item.amount,
+          0
+        );
+        await studentFees.save();
+        returnId = studentFees._id;
+        continue;
+      }
+
+      const newFeesStructure = new StudentFees({
+        student: studentId,
+        session: session_info,
+        class: class_info,
+        feesMaster: feesMaster._id,
+        fees: feesMaster.headers.map((item) => ({
+          name: item.header.name,
+          feesCode: item.header.feesCode,
+          occurrence: item.header.occurrence,
+          amount: item.amount,
+          discountAmount: 0,
+          finalAmount: item.amount,
+          dueDate: item.header.dueDate,
+          paidAmount: 0,
+        })),
+        totalFinalAmount: feesMaster.headers.reduce(
+          (sum, item) => sum + item.amount,
+          0
+        ),
+      });
+
+      await newFeesStructure.save();
+      returnId = newFeesStructure._id;
+    }
+    return { feesStructureId: returnId };
+  } catch (error) {
+    return "";
+  }
+};
+
 const createFeesStructure = asyncHandler(async (req, res) => {
   const { student, feesMaster } = req.body;
 
@@ -67,4 +146,4 @@ const createFeesStructure = asyncHandler(async (req, res) => {
   }
 });
 
-export { createFeesStructure };
+export { createFeesStructure, handleCreateFees };

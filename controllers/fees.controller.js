@@ -97,6 +97,16 @@ const createFeesMaster = asyncHandler(async (req, res) => {
       return res.status(400).json(new ApiRes(400, null, "Header is required"));
     }
 
+    const existingFeesMaster = await FeesMaster.findOne({ group });
+
+    if (existingFeesMaster) {
+      return res
+        .status(400)
+        .json(
+          new ApiRes(400, null, "Fees master already exists with this group")
+        );
+    }
+
     const newFeesMaster = new FeesMaster({
       group,
       headers,
@@ -253,6 +263,20 @@ const getAllHeaders = asyncHandler(async (req, res) => {
 const getAllGroups = asyncHandler(async (req, res) => {
   try {
     const groups = await FeesGroup.find().select("-__v -createdAt -updatedAt");
+    return res
+      .status(200)
+      .json(new ApiRes(200, groups, "Fees groups fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching fees groups:", error);
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const getAllGroupsForDropdown = asyncHandler(async (req, res) => {
+  try {
+    const groups = await FeesGroup.find().select(
+      "-__v -createdAt -updatedAt -groupCode -description"
+    );
     return res
       .status(200)
       .json(new ApiRes(200, groups, "Fees groups fetched successfully"));
@@ -494,6 +518,7 @@ export {
   addHeaderToMaster,
   getAllHeaders,
   getAllGroups,
+  getAllGroupsForDropdown,
   getAllMasters,
   getHeaderById,
   updateHeader,

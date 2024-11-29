@@ -8,12 +8,14 @@ const StudentFeesSchema = new Schema(
       required: true,
     },
     session: {
-      year: { type: String, required: true },
-      isActive: { type: Boolean, default: true },
+      type: Schema.Types.ObjectId,
+      ref: "Session",
+      required: true,
     },
     class: {
-      grade: { type: String, required: true },
-      section: { type: String },
+      type: Schema.Types.ObjectId,
+      ref: "Class",
+      required: true,
     },
     feesMaster: {
       type: Schema.Types.ObjectId,

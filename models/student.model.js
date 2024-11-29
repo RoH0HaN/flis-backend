@@ -112,7 +112,7 @@ const studentSchema = new Schema(
       ref: "Section",
       required: true,
     },
-    session: {
+    session_info: {
       type: Schema.Types.ObjectId,
       ref: "Session",
       required: true,

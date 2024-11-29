@@ -171,15 +171,7 @@ const createSection = asyncHandler(async (req, res) => {
 const getAllClasses = asyncHandler(async (req, res) => {
   try {
     const classes = await Class.find({})
-      .select("-__v -createdAt -updatedAt")
-      .populate({
-        path: "feesMasters",
-        select: "-__v -createdAt -updatedAt",
-        populate: {
-          path: "group",
-          select: "name",
-        },
-      })
+      .select("-__v -createdAt -updatedAt -feesMasters -description")
       .populate({
         path: "sections",
         select: "-__v -createdAt -updatedAt -classId",

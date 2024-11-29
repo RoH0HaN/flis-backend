@@ -6,6 +6,8 @@ import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
 import { Logger } from "../utils/logger.js";
 import mongoose from "mongoose";
 import { Student } from "../models/student.model.js";
+import { StudentFees } from "../models/student.fees.model.js";
+import { generateAgreement } from "../utils/pdf/generate.agreement..js";
 
 const createDocument = asyncHandler(async (req, res) => {
   const { student, documentType, description } = req.body;
@@ -107,4 +109,60 @@ const getStudentDocuments = asyncHandler(async (req, res) => {
   }
 });
 
-export { createDocument, deleteDocument, getStudentDocuments };
+const generateAgreementPdf = asyncHandler(async (req, res) => {
+  const { feesStructureId } = req.params;
+
+  if (!feesStructureId || !mongoose.isValidObjectId(feesStructureId)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing fees structure ID"));
+  }
+  try {
+    const feeStructure = await StudentFees.findById(feesStructureId)
+      .select("student class session fees")
+      .populate("student class session");
+
+    if (!feeStructure) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fee structure not found"));
+    }
+
+    const studentInfo = {
+      studentName:
+        feeStructure.student.student_details.first_name +
+        " " +
+        feeStructure.student.student_details.last_name,
+      fatherName:
+        feeStructure.student.parent_guardian_details.father_information.name,
+      motherName:
+        feeStructure.student.parent_guardian_details.mother_information.name,
+      dob: feeStructure.student.student_details.date_of_birth,
+      grade: feeStructure.student.student_details.class,
+      academicYear: feeStructure.session.name,
+    };
+
+    const guardianInfo = {
+      guardianName:
+        feeStructure.student.parent_guardian_details.guardian_information
+          .motherName,
+      address:
+        feeStructure.student.parent_guardian_details.guardian_information
+          .address || "N/A",
+    };
+
+    const feesInfo = feeStructure.fees;
+
+    generateAgreement(res, studentInfo, guardianInfo, feesInfo);
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+export {
+  createDocument,
+  deleteDocument,
+  getStudentDocuments,
+  generateAgreementPdf,
+};
