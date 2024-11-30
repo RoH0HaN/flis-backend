@@ -1,5 +1,6 @@
 import { Admission } from "../models/admission.model.js";
 import { Section } from "../models/class.model.js";
+import { StudentFees } from "../models/student.fees.model.js";
 import { Student } from "../models/student.model.js";
 import { ApiRes, validateFields } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
@@ -270,7 +271,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
   }
 
   try {
-    const student = await Student.findById(id)
+    let student = await Student.findById(id)
       .populate({
         path: "class_info",
         select: "name",
@@ -290,6 +291,11 @@ const getStudentDetails = asyncHandler(async (req, res) => {
         .json(new ApiRes(404, null, "Student not found with this ID"));
     }
 
+    const feesStructure = await StudentFees.findOne({ student: id }).select(
+      "fees"
+    );
+
+    student = { ...student._doc, fees: feesStructure?.fees };
     return res
       .status(200)
       .json(new ApiRes(200, student, "Student details fetched successfully"));
