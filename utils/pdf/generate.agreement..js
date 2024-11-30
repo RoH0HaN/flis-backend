@@ -51,7 +51,18 @@ async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
         style: "body",
       },
       {
-        text: `- Student's Name  :   ${studentInfo.studentName || "N/A"}\n- Father's Name    :   ${studentInfo.fatherName || "N/A"}\n- Mother's Name   :   ${studentInfo.motherName || "N/A"}\n- Date of Birth        :   ${studentInfo.dob || "N/A"}\n- Grade                    :   ${studentInfo.grade || "N/A"}\n- Academic Year    :   ${studentInfo.academicYear || "N/A"}\n- Admission Fees  :   ${studentInfo.admissionFees || "N/A"}\n- Monthly Fees       :   ${studentInfo.monthlyFees || "N/A"}\n- Transport Fees    :   ${studentInfo.transportFees || "N/A"}\n\n`,
+        text: `- Student's Name  :   ${studentInfo.studentName || "N/A"}\n- Father's Name    :   ${studentInfo.fatherName || "N/A"}\n- Mother's Name   :   ${studentInfo.motherName || "N/A"}\n- Date of Birth        :   ${studentInfo.dob || "N/A"}\n- Grade                    :   ${studentInfo.grade || "N/A"}\n- Academic Year    :   ${studentInfo.academicYear || "N/A"}
+        ${
+          feesInfo && feesInfo.length > 0
+            ? feesInfo
+                .map(
+                  (fee) => `
+        - ${fee.name} : ${fee.finalAmount || "N/A"}
+      `
+                )
+                .join("")
+            : "No fees information available."
+        }`,
         style: "body",
       },
 
@@ -66,7 +77,7 @@ async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
         ul: [
           "Ensure the student(s) attend school regularly and punctually, abiding by the school’s schedule and academic calendar.",
           "Support the student(s) in their studies and homework.",
-          "Abide by the School’s rules and regulations, as communicated by the School from time to time.",
+          "Abide by the School’s rules and regulations, as communicated by the School from time to time.\n\n",
         ],
         style: "body",
       },

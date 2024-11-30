@@ -137,18 +137,24 @@ const generateAgreementPdf = asyncHandler(async (req, res) => {
         feeStructure.student.parent_guardian_details.father_information.name,
       motherName:
         feeStructure.student.parent_guardian_details.mother_information.name,
-      dob: feeStructure.student.student_details.date_of_birth,
+      dob: new Date(
+        feeStructure.student.student_details.date_of_birth
+      ).toLocaleDateString(),
       grade: feeStructure.student.student_details.class,
       academicYear: feeStructure.session.name,
     };
 
     const guardianInfo = {
       guardianName:
-        feeStructure.student.parent_guardian_details.guardian_information
-          .motherName,
+        feeStructure.student.parent_guardian_details.guardian_information.name,
       address:
-        feeStructure.student.parent_guardian_details.guardian_information
-          .address || "N/A",
+        feeStructure.student.communication_address.current_address.village +
+        ", " +
+        feeStructure.student.communication_address.current_address.district +
+        ", " +
+        feeStructure.student.communication_address.current_address.state +
+        ", " +
+        feeStructure.student.communication_address.current_address.postal_code,
     };
 
     const feesInfo = feeStructure.fees;
