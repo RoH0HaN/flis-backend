@@ -4,7 +4,7 @@ import { Student } from "../models/student.model.js";
 import { ApiRes, validateFields } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 import { Logger } from "../utils/logger.js";
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 const handleCreateStudent = async ({
   application_id,
@@ -238,7 +238,8 @@ const getStudentsByStatus = asyncHandler(async (req, res) => {
 
     const studentList = students.map((student) => {
       return {
-        id: student._id,
+        _id: student._id,
+        flisId: student._id,
         name: `${student.student_details.first_name} ${student.student_details.last_name}`,
         gender: student.student_details.gender,
         photo: student.student_details.student_photo,
@@ -259,10 +260,40 @@ const getStudentsByStatus = asyncHandler(async (req, res) => {
   }
 });
 
+const getStudentDetails = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id || !isValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing student ID"));
+  }
+
+  try {
+    const student = await Student.findById(id).populate(
+      "class_info session_info section_info"
+    );
+
+    if (!student) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Student not found with this ID"));
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, student, "Student details fetched successfully"));
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
 export {
   getCurrentStatus,
   createStudent,
   handleCreateOrUpdateStudent,
   handleCreateStudent,
   getStudentsByStatus,
+  getStudentDetails,
 };

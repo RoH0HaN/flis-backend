@@ -14,13 +14,6 @@ const fonts = {
     italics: path.join(__dirname, "../../fonts/Roboto-Italic.ttf"),
     bolditalics: path.join(__dirname, "../../fonts/Roboto-BoldItalic.ttf"),
   },
-  // Adding fallback
-  fallback: {
-    normal: path.join(
-      __dirname,
-      "../../node_modules/pdfmake/build/vfs_fonts.js"
-    ),
-  },
 };
 
 const printer = new pdfMake(fonts);
@@ -128,27 +121,36 @@ async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
     },
   };
 
-  const pdfPath = path.join(
-    __dirname,
-    `../../public/temp/agreement_${Date.now()}.pdf`
-  );
+  const pdfPath = path.join(__dirname, `../../public/temp/agreement.pdf`);
 
+  const pdfDoc = printer.createPdfKitDocument(docDefinition);
   const writeStream = fs.createWriteStream(pdfPath);
 
   writeStream.setMaxListeners(15); // Increase listeners for specific cases if needed
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", "inline; filename=agreement.pdf");
-
-  const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  pdfDoc.pipe(writeStream); // Write to a local file
-  writeStream.on("finish", () => {
-    console.log("PDF written to file system.");
-  });
-  pdfDoc.pipe(res).on("finish", () => {
-    console.log("PDF successfully sent to the client");
-  });
+  pdfDoc.pipe(writeStream);
   pdfDoc.end();
+
+  // Ensure the file is fully written before sending
+  writeStream.on("finish", () => {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="agreement.pdf"'
+    );
+
+    res.sendFile(pdfPath, (err) => {
+      if (err) {
+        console.error("Error sending file:", err);
+        res.status(500).send("Error occurred while sending the PDF.");
+      }
+    });
+  });
+
+  writeStream.on("error", (err) => {
+    console.error("Error writing file:", err);
+    res.status(500).send("Error generating the PDF.");
+  });
 }
 
 export { generateAgreement };

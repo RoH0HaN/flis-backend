@@ -5,6 +5,7 @@ import {
   createStudent,
   getCurrentStatus,
   getStudentsByStatus,
+  getStudentDetails,
 } from "../controllers/student.controller.js";
 
 const router = Router();
@@ -14,5 +15,6 @@ router
   .route("/get-current-status/:application_id")
   .get(verifyJWT, getCurrentStatus);
 router.route("/get-students/:status").get(verifyJWT, getStudentsByStatus);
+router.route("/get/:id").get(verifyJWT, getStudentDetails);
 
 export default router;

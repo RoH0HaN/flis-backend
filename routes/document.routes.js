@@ -17,6 +17,6 @@ router.route("/delete/:id").delete(verifyJWT, deleteDocument);
 router.route("/get-student-documents/:student").get(getStudentDocuments);
 router
   .route("/generate-agreement-pdf/:feesStructureId")
-  .post(generateAgreementPdf);
+  .get(generateAgreementPdf);
 
 export default router;
