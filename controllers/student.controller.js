@@ -295,7 +295,11 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       "fees"
     );
 
-    student = { ...student._doc, fees: feesStructure?.fees };
+    student = {
+      ...student._doc,
+      fees: feesStructure?.fees,
+      studentFeesId: feesStructure?._id,
+    };
     return res
       .status(200)
       .json(new ApiRes(200, student, "Student details fetched successfully"));
