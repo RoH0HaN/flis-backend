@@ -270,9 +270,19 @@ const getStudentDetails = asyncHandler(async (req, res) => {
   }
 
   try {
-    const student = await Student.findById(id).populate(
-      "class_info session_info section_info"
-    );
+    const student = await Student.findById(id)
+      .populate({
+        path: "class_info",
+        select: "name",
+      })
+      .populate({
+        path: "section_info",
+        select: "name",
+      })
+      .populate({
+        path: "session_info",
+        select: "name",
+      });
 
     if (!student) {
       return res

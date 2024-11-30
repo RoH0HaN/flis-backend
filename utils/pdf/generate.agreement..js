@@ -132,7 +132,10 @@ async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
     },
   };
 
-  const pdfPath = path.join(__dirname, `../../public/temp/agreement.pdf`);
+  const pdfPath = path.join(
+    __dirname,
+    `../../public/temp/agreement_${Date.now()}.pdf`
+  );
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
   const writeStream = fs.createWriteStream(pdfPath);
