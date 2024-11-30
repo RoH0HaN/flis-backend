@@ -34,23 +34,8 @@ const handleCreateFees = async ({
         student: studentId,
         feesMaster: feesMaster._id,
       });
-      if (studentFees) {
-        studentFees.fees = feesMaster.headers.map((item) => ({
-          name: item.header.name,
-          feesCode: item.header.feesCode,
-          occurrence: item.header.occurrence,
-          amount: item.amount,
-          discountAmount: 0,
-          finalAmount: item.amount,
-          dueDate: item.header.dueDate,
-          paidAmount: 0,
-        }));
 
-        studentFees.totalFinalAmount = feesMaster.headers.reduce(
-          (sum, item) => sum + item.amount,
-          0
-        );
-        await studentFees.save();
+      if (studentFees) {
         returnId = studentFees._id;
         continue;
       }

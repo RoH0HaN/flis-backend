@@ -141,7 +141,7 @@ const studentSchema = new Schema(
     applicationId: { type: Schema.Types.ObjectId, ref: "Admission" },
     currentStatus: {
       type: String,
-      enum: ["N/A", "EDITED", "FEES", "SIGNED", "UPLOADED", "COMPLETED"],
+      enum: ["N/A", "FEES", "SIGNED", "UPLOADED", "COMPLETED"],
       default: "N/A",
     },
   },

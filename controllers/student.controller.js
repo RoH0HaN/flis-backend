@@ -28,7 +28,7 @@ const handleCreateStudent = async ({
 
   if (student) {
     return {
-      message: "Student already exists with this application ID",
+      message: "Student already admitted",
       studentId: student._id,
     };
   }
@@ -46,8 +46,15 @@ const handleCreateStudent = async ({
   });
 
   newStudent.admission_date = new Date();
-  newStudent.currentStatus = "EDITED";
+  newStudent.currentStatus = "FEES";
   await newStudent.save();
+
+  const section = await Section.findById(section_info).select("currStudents");
+
+  if (section) {
+    section.currStudents += 1;
+    await section.save();
+  }
 
   return { message: "Student created successfully", studentId: newStudent._id };
 };
@@ -103,7 +110,7 @@ const handleCreateOrUpdateStudent = async ({
   });
 
   newStudent.admission_date = new Date();
-  newStudent.currentStatus = "EDITED";
+  newStudent.currentStatus = "FEES";
   await newStudent.save();
 
   const section = await Section.findById(section_info);
@@ -208,9 +215,54 @@ const createStudent = asyncHandler(async (req, res) => {
   }
 });
 
+const getStudentsByStatus = asyncHandler(async (req, res) => {
+  const { status } = req.params;
+
+  if (!status) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing status"));
+  }
+
+  try {
+    // Only retrieve necessary fields to optimize performance
+    const students = await Student.find({
+      currentStatus: status,
+    }).populate("session_info");
+
+    if (!students) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "No applications found"));
+    }
+
+    const studentList = students.map((student) => {
+      return {
+        id: student._id,
+        name: `${student.student_details.first_name} ${student.student_details.last_name}`,
+        gender: student.student_details.gender,
+        photo: student.student_details.student_photo,
+        date_of_birth: student.student_details.date_of_birth,
+        admission_id: student.applicationId,
+        academic_era: student.session_info?.name,
+      };
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiRes(200, studentList, "Applications list fetched successfully.")
+      );
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
 export {
   getCurrentStatus,
   createStudent,
   handleCreateOrUpdateStudent,
   handleCreateStudent,
+  getStudentsByStatus,
 };

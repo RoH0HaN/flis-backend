@@ -25,7 +25,7 @@ const fonts = {
 
 const printer = new pdfMake(fonts);
 
-function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
+async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
   // Today's date for dynamic insertion
   const today = new Date().toLocaleDateString("en-US", {
     day: "numeric",
@@ -128,16 +128,26 @@ function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
     },
   };
 
-  const pdfDoc = printer.createPdfKitDocument(docDefinition);
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    "attachment; filename=flis_contract.pdf"
+  const pdfPath = path.join(
+    __dirname,
+    `../../public/temp/agreement_${Date.now()}.pdf`
   );
 
-  // Pipe the PDF to the response
-  pdfDoc.pipe(res);
+  const writeStream = fs.createWriteStream(pdfPath);
+
+  writeStream.setMaxListeners(15); // Increase listeners for specific cases if needed
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "inline; filename=agreement.pdf");
+
+  const pdfDoc = printer.createPdfKitDocument(docDefinition);
+  pdfDoc.pipe(writeStream); // Write to a local file
+  writeStream.on("finish", () => {
+    console.log("PDF written to file system.");
+  });
+  pdfDoc.pipe(res).on("finish", () => {
+    console.log("PDF successfully sent to the client");
+  });
   pdfDoc.end();
 }
 
