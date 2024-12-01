@@ -196,7 +196,10 @@ const updateApplication = asyncHandler(async (req, res) => {
       bank_details,
       class_info,
       section_info,
-      session_info,
+      session_info: {
+        name: admission.student_details.academic_era,
+        id: session_info,
+      },
     });
 
     fees_info = [fees_info.split(",")];

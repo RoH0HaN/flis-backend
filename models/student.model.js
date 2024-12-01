@@ -86,6 +86,7 @@ const bankDetailsSchema = new Schema({
 // Main Student schema
 const studentSchema = new Schema(
   {
+    flisId: { type: String, required: true, unique: true },
     student_details: personalDetailsSchema,
     parent_guardian_details: {
       father_information: contactInfoSchema,

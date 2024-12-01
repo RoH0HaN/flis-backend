@@ -7,6 +7,39 @@ import { asyncHandler } from "../utils/async.handler.js";
 import { Logger } from "../utils/logger.js";
 import mongoose, { isValidObjectId } from "mongoose";
 
+const generateUniqueId = async (word, sessionName) => {
+  // Extract the session prefix
+  const sessionPrefix = sessionName
+    .split(" ") // Split into words
+    .map((word) => word[0].toUpperCase()) // Take the first letter of each word
+    .join("") // Combine into a single string
+    .replace(/[^A-Z]/g, ""); // Remove non-alphabetic characters
+
+  // Construct the prefix for the unique ID
+  const prefix = `${word}${sessionPrefix}`;
+
+  const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Fetch the maximum existing ID for the current prefix
+  const lastStudent = await Student.findOne({
+    flisId: new RegExp(`^${escapedPrefix}`),
+  })
+    .sort({ uniqueId: -1 }) // Sort by descending order of uniqueId
+    .exec();
+
+  let nextNumber = 1; // Default start
+  if (lastStudent) {
+    // Extract the numeric part and increment
+    const lastId = lastStudent.uniqueId;
+    const numberPart = parseInt(lastId.slice(prefix.length), 10);
+    nextNumber = numberPart + 1;
+  }
+
+  // Format the new unique ID
+  const uniqueId = `${prefix}${String(nextNumber).padStart(5, "0")}`;
+  return uniqueId;
+};
+
 const handleCreateStudent = async ({
   application_id,
   student_details,
@@ -34,8 +67,11 @@ const handleCreateStudent = async ({
     };
   }
 
+  const flisId = await generateUniqueId("FLIS", session_info.name);
+
   const newStudent = new Student({
     applicationId: application_id,
+    flisId,
     student_details,
     parent_guardian_details,
     communication_address,
@@ -43,11 +79,12 @@ const handleCreateStudent = async ({
     bank_details,
     class_info,
     section_info,
-    session_info,
+    session_info: session_info.id,
   });
 
   newStudent.admission_date = new Date();
   newStudent.currentStatus = "FEES";
+
   await newStudent.save();
 
   const section = await Section.findById(section_info).select("currStudents");
@@ -240,13 +277,16 @@ const getStudentsByStatus = asyncHandler(async (req, res) => {
     const studentList = students.map((student) => {
       return {
         _id: student._id,
-        flisId: student._id,
+        flisId: student.flisId,
         name: `${student.student_details.first_name} ${student.student_details.last_name}`,
         gender: student.student_details.gender,
         photo: student.student_details.student_photo,
-        date_of_birth: student.student_details.date_of_birth,
-        admission_id: student.applicationId,
+        date_of_birth: new Date(
+          student.student_details.date_of_birth
+        ).toLocaleDateString(),
+        admission_id: student.flisId,
         academic_era: student.session_info?.name,
+        admission_date: new Date(student.admission_date).toLocaleDateString(),
       };
     });
 
