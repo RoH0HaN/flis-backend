@@ -326,7 +326,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       })
       .populate({
         path: "applicationId",
-        select: "student_details",
+        select: "student_details parent_guardian_details",
       });
 
     if (!student) {
@@ -350,6 +350,12 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       // ...student._doc,
       flisId: student.flisId,
       student_details: mergedStudentDetails,
+      medical_details: student.other_details?.medical_details,
+      bank_details: student.bank_details,
+      parent_guardian_details: student.applicationId?.parent_guardian_details,
+      communication_address: student.communication_address,
+      previous_institute_details:
+        student.other_details?.previous_institute_details,
       class: student.class_info?.name,
       section: student.section_info?.name,
       session: student.session_info?.name,
