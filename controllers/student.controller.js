@@ -323,6 +323,10 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       .populate({
         path: "session_info",
         select: "name",
+      })
+      .populate({
+        path: "applicationId",
+        select: "student_details",
       });
 
     if (!student) {
@@ -331,18 +335,32 @@ const getStudentDetails = asyncHandler(async (req, res) => {
         .json(new ApiRes(404, null, "Student not found with this ID"));
     }
 
+    student = student.toObject();
+
     const feesStructure = await StudentFees.findOne({ student: id }).select(
       "fees"
     );
 
-    student = {
-      ...student._doc,
+    const mergedStudentDetails = {
+      ...student.student_details, // Base object
+      ...student.applicationId?.student_details, // Overwrites fields from applicationId if available
+    };
+
+    const result = {
+      // ...student._doc,
+      flisId: student.flisId,
+      student_details: mergedStudentDetails,
+      class: student.class_info?.name,
+      section: student.section_info?.name,
+      session: student.session_info?.name,
       fees: feesStructure?.fees,
       studentFeesId: feesStructure?._id,
+      admission_date: student.admission_date,
     };
+
     return res
       .status(200)
-      .json(new ApiRes(200, student, "Student details fetched successfully"));
+      .json(new ApiRes(200, result, "Student details fetched successfully"));
   } catch (error) {
     Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
