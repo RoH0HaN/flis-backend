@@ -132,39 +132,13 @@ async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
     },
   };
 
-  const pdfPath = path.join(
-    __dirname,
-    `../../public/temp/agreement_${Date.now()}.pdf`
-  );
-
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  const writeStream = fs.createWriteStream(pdfPath);
+  const fileName = `${studentInfo.studentName}_agreement.pdf`;
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
 
-  writeStream.setMaxListeners(15); // Increase listeners for specific cases if needed
-
-  pdfDoc.pipe(writeStream);
+  pdfDoc.pipe(res);
   pdfDoc.end();
-
-  // Ensure the file is fully written before sending
-  writeStream.on("finish", () => {
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      'attachment; filename="agreement.pdf"'
-    );
-
-    res.sendFile(pdfPath, (err) => {
-      if (err) {
-        console.error("Error sending file:", err);
-        res.status(500).send("Error occurred while sending the PDF.");
-      }
-    });
-  });
-
-  writeStream.on("error", (err) => {
-    console.error("Error writing file:", err);
-    res.status(500).send("Error generating the PDF.");
-  });
 }
 
 export { generateAgreement };
