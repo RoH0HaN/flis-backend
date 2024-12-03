@@ -1,5 +1,6 @@
 import { Admission } from "../models/admission.model.js";
 import { Section } from "../models/class.model.js";
+import { Document } from "../models/document.model.js";
 import { StudentFees } from "../models/student.fees.model.js";
 import { Student } from "../models/student.model.js";
 import { ApiRes, validateFields } from "../utils/api.response.js";
@@ -341,6 +342,10 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       "fees"
     );
 
+    const documents = await Document.find({ student: id }).select(
+      "-__v -createdAt -updatedAt"
+    );
+
     const mergedStudentDetails = {
       ...student.student_details, // Base object
       ...student.applicationId?.student_details, // Overwrites fields from applicationId if available
@@ -362,6 +367,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       fees: feesStructure?.fees,
       studentFeesId: feesStructure?._id,
       admission_date: student.admission_date,
+      documents: documents,
     };
 
     return res

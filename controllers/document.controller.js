@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/async.handler.js";
 import { uploadPdfToFirebase } from "../utils/upload.pdf.firebase.js";
 import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
 import { Logger } from "../utils/logger.js";
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import { Student } from "../models/student.model.js";
 import { StudentFees } from "../models/student.fees.model.js";
 import { generateAgreement } from "../utils/pdf/generate.agreement..js";
@@ -54,30 +54,6 @@ const createDocument = asyncHandler(async (req, res) => {
     return res
       .status(201)
       .json(new ApiRes(200, null, "Document created successfully"));
-  } catch (error) {
-    Logger(error, "error");
-    return res.status(500).json(new ApiRes(500, null, error.message));
-  }
-});
-
-const deleteDocument = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  if (!id || !mongoose.isValidObjectId(id)) {
-    return res
-      .status(400)
-      .json(new ApiRes(400, null, "Invalid or missing document ID"));
-  }
-  try {
-    const document = await Document.findById(id);
-    if (!document) {
-      return res.status(404).json(new ApiRes(404, null, "Document not found"));
-    }
-    await deleteFromFirebase(document.fileUrl);
-    await Document.findByIdAndDelete(id);
-    return res
-      .status(200)
-      .json(new ApiRes(200, null, "Document deleted successfully"));
   } catch (error) {
     Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
@@ -160,6 +136,57 @@ const generateAgreementPdf = asyncHandler(async (req, res) => {
     const feesInfo = feeStructure.fees;
 
     generateAgreement(res, studentInfo, guardianInfo, feesInfo);
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+const deleteDocument = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id || !isValidObjectId(id)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing document ID"));
+  }
+
+  try {
+    const document = await Document.findById(id);
+    if (!document) {
+      return res.status(404).json(new ApiRes(404, null, "Document not found"));
+    }
+    const deleted = await deleteFromFirebase(document.fileUrl);
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json(
+          new ApiRes(
+            404,
+            null,
+            "Something went wrong while deleting file from Firebase"
+          )
+        );
+    }
+
+    const deletedDocument = await Document.findByIdAndDelete(id);
+
+    if (!deletedDocument) {
+      return res
+        .status(404)
+        .json(
+          new ApiRes(
+            404,
+            null,
+            "Something went wrong while deleting document from database"
+          )
+        );
+    }
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Document deleted successfully"));
   } catch (error) {
     Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));
