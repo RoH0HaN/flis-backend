@@ -33,6 +33,7 @@ import sessionRoutes from "../routes/session.routes.js";
 import documentRoutes from "../routes/document.routes.js";
 import studentRoutes from "../routes/student.routes.js";
 import studentFeesRoutes from "../routes/student.fees.routes.js";
+import enquiryRoutes from "../routes/enquiry.routes.js";
 
 // -- Routes
 app.use(`${api_v1}/admission`, admissionRoutes);
@@ -45,5 +46,6 @@ app.use(`${api_v1}/session`, sessionRoutes);
 app.use(`${api_v1}/document`, documentRoutes);
 app.use(`${api_v1}/student`, studentRoutes);
 app.use(`${api_v1}/student-fees`, studentFeesRoutes);
+app.use(`${api_v1}/enquiry`, enquiryRoutes);
 
 export { app };
