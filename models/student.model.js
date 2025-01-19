@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { HealthRecord } from "./health.record.model.js";
 
 // Subschema for personal details
 const personalDetailsSchema = new Schema({
@@ -148,6 +149,32 @@ const studentSchema = new Schema(
   },
   { timestamps: true }
 );
+
+// Middleware to create a HealthRecord document when a Student is created
+studentSchema.post("save", async function (doc) {
+  try {
+    let healthRecord = await HealthRecord.findOne({
+      studentId: doc._id,
+    });
+
+    if (!healthRecord) {
+      healthRecord = await HealthRecord.create({
+        studentId: doc._id,
+      });
+
+      healthRecord.records.push({
+        medical_details: doc.other_details.medical_details,
+        createdAt: new Date(),
+        dietChartUrl: "",
+      });
+
+      await healthRecord.save();
+      console.log("HealthRecord created for student:", doc._id);
+    }
+  } catch (error) {
+    console.error("Error creating HealthRecord:", error);
+  }
+});
 
 // Models
 export const Student = model("Student", studentSchema);
