@@ -2,7 +2,12 @@ import { Schema, model } from "mongoose";
 
 const healthRecordSchema = new Schema(
   {
-    studentId: { type: Schema.Types.ObjectId, ref: "Student", required: true },
+    studentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Student",
+      required: true,
+      unique: true,
+    },
     records: {
       type: Schema.Types.Array,
       default: [],

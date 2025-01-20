@@ -131,4 +131,44 @@ const createFeesStructure = asyncHandler(async (req, res) => {
   }
 });
 
-export { createFeesStructure, handleCreateFees };
+const getFeesStructure = asyncHandler(async (req, res) => {
+  const { studentId, sessionId, classId } = req.query;
+
+  if (
+    !studentId ||
+    !mongoose.isValidObjectId(studentId) ||
+    !sessionId ||
+    !mongoose.isValidObjectId(sessionId) ||
+    !classId ||
+    !mongoose.isValidObjectId(classId)
+  ) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing query parameters"));
+  }
+
+  try {
+    const feesStructure = await StudentFees.findOne({
+      student: studentId,
+      session: sessionId,
+      class: classId,
+    }).select("-__v -createdAt -updatedAt");
+
+    if (!feesStructure) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees structure not found"));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiRes(200, feesStructure, "Fees structure fetched successfully")
+      );
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+export { createFeesStructure, handleCreateFees, getFeesStructure };

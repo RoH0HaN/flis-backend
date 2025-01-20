@@ -64,4 +64,37 @@ const addHealthRecord = asyncHandler(async (req, res) => {
   }
 });
 
-export { addHealthRecord };
+const getHealthRecordOfStudent = asyncHandler(async (req, res) => {
+  const { studentId } = req.params;
+
+  if (!studentId || !isValidObjectId(studentId)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing student ID"));
+  }
+
+  try {
+    const recordDocument = await HealthRecord.findOne({ studentId }).select(
+      "records"
+    );
+
+    if (!recordDocument) {
+      return res
+        .status(404)
+        .json(
+          new ApiRes(404, null, "Health record not found for this student")
+        );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiRes(200, recordDocument, "Health record fetched successfully")
+      );
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+
+export { addHealthRecord, getHealthRecordOfStudent };
