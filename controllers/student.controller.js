@@ -315,7 +315,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
     let student = await Student.findById(id)
       .populate({
         path: "class_info",
-        select: "name",
+        select: "name _id",
       })
       .populate({
         path: "section_info",
@@ -323,7 +323,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       })
       .populate({
         path: "session_info",
-        select: "name",
+        select: "name _id",
       })
       .populate({
         path: "applicationId",
@@ -353,6 +353,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
 
     const result = {
       // ...student._doc,
+      _id: student._id,
       flisId: student.flisId,
       student_details: mergedStudentDetails,
       medical_details: student.other_details?.medical_details,
@@ -361,9 +362,9 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       communication_address: student.communication_address,
       previous_institute_details:
         student.applicationId?.other_details?.previous_institute_details,
-      class: student.class_info?.name,
+      class: student.class_info,
       section: student.section_info?.name,
-      session: student.session_info?.name,
+      session: student.session_info,
       fees: feesStructure?.fees,
       studentFeesId: feesStructure?._id,
       admission_date: student.admission_date,
