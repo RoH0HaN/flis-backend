@@ -171,4 +171,90 @@ const getFeesStructure = asyncHandler(async (req, res) => {
   }
 });
 
-export { createFeesStructure, handleCreateFees, getFeesStructure };
+const addPaymentHistory = asyncHandler(async (req, res) => {
+  const { feesStructureId, feeId } = req.query;
+
+  if (
+    !feesStructureId ||
+    !mongoose.isValidObjectId(feesStructureId) ||
+    !feeId ||
+    !mongoose.isValidObjectId(feeId)
+  ) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing fees structure ID"));
+  }
+
+  const { amountPaid, paymentMethod, transactionId } = req.body;
+
+  if (
+    validateFields(
+      req.body,
+      ["amountPaid", "paymentMethod", "transactionId"],
+      res
+    ) !== true
+  ) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing payment details"));
+  }
+
+  try {
+    const feesStructure = await StudentFees.findById(feesStructureId);
+
+    if (!feesStructure) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Fees structure not found"));
+    }
+
+    const fee = feesStructure.fees.id(feeId);
+
+    if (!fee) {
+      return res.status(404).json(new ApiRes(404, null, "Fee not found"));
+    }
+
+    const remainingAmount = fee.finalAmount - fee.paidAmount;
+
+    // Check for overpayment
+    if (amountPaid > remainingAmount) {
+      return res
+        .status(400)
+        .json(
+          new ApiRes(
+            400,
+            null,
+            `Amount exceeds the remaining amount of ${remainingAmount}`
+          )
+        );
+    }
+
+    fee.paymentHistory.push({
+      amountPaid,
+      paymentMethod,
+      transactionId,
+    });
+
+    // Update paidAmount and paymentStatus
+    fee.paidAmount += amountPaid;
+    fee.paymentStatus =
+      fee.paidAmount >= fee.finalAmount
+        ? "PAID"
+        : fee.paidAmount > 0
+          ? "PARTIALLY_PAID"
+          : "UNPAID";
+
+    await feesStructure.save();
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Payment record added successfully"));
+  } catch (error) {}
+});
+
+export {
+  createFeesStructure,
+  handleCreateFees,
+  getFeesStructure,
+  addPaymentHistory,
+};
