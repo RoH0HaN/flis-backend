@@ -187,13 +187,7 @@ const addPaymentHistory = asyncHandler(async (req, res) => {
 
   const { amountPaid, paymentMethod, transactionId } = req.body;
 
-  if (
-    validateFields(
-      req.body,
-      ["amountPaid", "paymentMethod", "transactionId"],
-      res
-    ) !== true
-  ) {
+  if (validateFields(req.body, ["amountPaid", "paymentMethod"], res) !== true) {
     return res
       .status(400)
       .json(new ApiRes(400, null, "Invalid or missing payment details"));
