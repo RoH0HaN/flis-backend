@@ -25,13 +25,14 @@ const generateUniqueId = async (word, sessionName) => {
   const lastStudent = await Student.findOne({
     flisId: new RegExp(`^${escapedPrefix}`),
   })
+    .select("flisId")
     .sort({ uniqueId: -1 }) // Sort by descending order of uniqueId
     .exec();
 
   let nextNumber = 1; // Default start
   if (lastStudent) {
     // Extract the numeric part and increment
-    const lastId = lastStudent.uniqueId;
+    const lastId = lastStudent.flisId;
     const numberPart = parseInt(lastId.slice(prefix.length), 10);
     nextNumber = numberPart + 1;
   }
@@ -98,6 +99,7 @@ const handleCreateStudent = async ({
   return { message: "Student created successfully", studentId: newStudent._id };
 };
 
+//helper funtion
 const handleCreateOrUpdateStudent = async ({
   application_id,
   student_details,
@@ -156,6 +158,11 @@ const handleCreateOrUpdateStudent = async ({
 
   section.currStudents += 1;
   await section.save();
+
+  // await Admission.updateOne(
+  //   { application_id },
+  //   { $set: { counselling_status: "APPROVED" } }
+  // );
 
   return { message: "Student created successfully", studentId: newStudent._id };
 };
