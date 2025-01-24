@@ -295,6 +295,8 @@ const getStudentsByStatus = asyncHandler(async (req, res) => {
         admission_id: student.flisId,
         academic_era: student.session_info?.name,
         admission_date: new Date(student.admission_date).toLocaleDateString(),
+        class: student.class_info,
+        section: student.section_info,
       };
     });
 
