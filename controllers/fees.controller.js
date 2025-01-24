@@ -288,12 +288,35 @@ const getAllGroupsForDropdown = asyncHandler(async (req, res) => {
 
 const getAllMasters = asyncHandler(async (req, res) => {
   try {
-    const masters = await FeesMaster.find().select(
-      "-__v -createdAt -updatedAt"
-    );
+    const masters = await FeesMaster.find()
+      .select("-__v -createdAt -updatedAt")
+      .populate({
+        path: "headers.header",
+        select: "-__v -createdAt -updatedAt",
+        options: { lean: true }, // Makes populated fields plain objects
+      })
+      .populate({
+        path: "group",
+        select: "-__v -createdAt -updatedAt",
+        options: { lean: true },
+      })
+      .lean();
+
+    // Transform the data to flatten headers and assign the correct `_id`
+    const transformedMasters = masters.map((master) => ({
+      ...master,
+      headers: master.headers.map(({ _id, header, amount }) => ({
+        amount,
+        ...header, // Flatten the populated header fields
+        _id, // ID from the array element
+      })),
+    }));
+
     return res
       .status(200)
-      .json(new ApiRes(200, masters, "Fees masters fetched successfully"));
+      .json(
+        new ApiRes(200, transformedMasters, "Fees masters fetched successfully")
+      );
   } catch (error) {
     console.error("Error fetching fees masters:", error);
     return res.status(500).json(new ApiRes(500, null, error.message));
