@@ -93,10 +93,6 @@ const createFeesMaster = asyncHandler(async (req, res) => {
         .json(new ApiRes(400, null, "Group and headers are required"));
     }
 
-    if (headers.some((item) => !item.header)) {
-      return res.status(400).json(new ApiRes(400, null, "Header is required"));
-    }
-
     const existingFeesMaster = await FeesMaster.findOne({ group });
 
     if (existingFeesMaster) {
@@ -107,18 +103,19 @@ const createFeesMaster = asyncHandler(async (req, res) => {
         );
     }
 
-    const newFeesMaster = new FeesMaster({
-      group,
-      headers,
-    });
+    const newFeesMaster = await FeesMaster.create({ group, headers });
 
-    await newFeesMaster.save();
+    if (!newFeesMaster) {
+      return res
+        .status(400)
+        .json(new ApiRes(400, null, "Unable to create fees master"));
+    }
 
     return res
       .status(201)
       .json(new ApiRes(201, newFeesMaster, "Fees master created successfully"));
   } catch (error) {
-    console.error("Error creating fees master:", error);
+    console.error("An error occurred while creating fees master:", error);
     return res
       .status(500)
       .json(
