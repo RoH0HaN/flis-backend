@@ -185,7 +185,7 @@ const addPaymentHistory = asyncHandler(async (req, res) => {
       .json(new ApiRes(400, null, "Invalid or missing fees structure ID"));
   }
 
-  const { amountPaid, paymentMethod, transactionId } = req.body;
+  const { discountAmount, amountPaid, paymentMethod, transactionId } = req.body;
 
   if (validateFields(req.body, ["amountPaid", "paymentMethod"], res) !== true) {
     return res
@@ -231,8 +231,10 @@ const addPaymentHistory = asyncHandler(async (req, res) => {
 
     // Update paidAmount and paymentStatus
     fee.paidAmount += amountPaid;
+    fee.discountAmount += discountAmount;
+    fee.finalAmount -= discountAmount;
     fee.paymentStatus =
-      fee.paidAmount >= fee.finalAmount
+      fee.paidAmount >= fee.finalAmount - discountAmount
         ? "PAID"
         : fee.paidAmount > 0
           ? "PARTIALLY_PAID"
