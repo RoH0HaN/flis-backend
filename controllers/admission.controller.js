@@ -184,6 +184,7 @@ const updateApplication = asyncHandler(async (req, res) => {
     admission.other_details = other_details;
     admission.bank_details = bank_details;
     admission.application_status = "APPROVED";
+    admission.counselling_status = "APPROVED";
 
     // Save the updated admission document
     await admission.save();

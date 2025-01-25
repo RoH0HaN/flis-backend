@@ -146,6 +146,11 @@ const studentSchema = new Schema(
       enum: ["N/A", "FEES", "SIGNED", "UPLOADED", "COMPLETED"],
       default: "N/A",
     },
+    boardingStatus: {
+      type: String,
+      enum: ["REGULAR", "BOARDER", "HOSTELLER"],
+      default: "REGULAR",
+    },
   },
   { timestamps: true }
 );
