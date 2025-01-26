@@ -26,7 +26,7 @@ const generateUniqueId = async (word, sessionName) => {
     flisId: new RegExp(`^${escapedPrefix}`),
   })
     .select("flisId")
-    .sort({ uniqueId: -1 }) // Sort by descending order of uniqueId
+    .sort({ flisId: -1 }) // Sort by descending order of uniqueId
     .exec();
 
   let nextNumber = 1; // Default start
@@ -52,6 +52,7 @@ const handleCreateStudent = async ({
   class_info,
   section_info,
   session_info,
+  boardingStatus,
 }) => {
   if (!application_id || !mongoose.isValidObjectId(application_id)) {
     return {
@@ -82,6 +83,7 @@ const handleCreateStudent = async ({
     class_info,
     section_info,
     session_info: session_info.id,
+    boardingStatus,
   });
 
   newStudent.admission_date = new Date();

@@ -153,6 +153,7 @@ const updateApplication = asyncHandler(async (req, res) => {
       class_info,
       section_info,
       session_info,
+      boardingStatus,
     } = req.body;
 
     let { fees_info } = req.body;
@@ -202,6 +203,7 @@ const updateApplication = asyncHandler(async (req, res) => {
         name: admission.student_details.academic_era,
         id: session_info,
       },
+      boardingStatus,
     });
 
     fees_info = [fees_info.split(",")];

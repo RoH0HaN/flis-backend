@@ -8,6 +8,7 @@ import mongoose, { isValidObjectId } from "mongoose";
 import { Student } from "../models/student.model.js";
 import { StudentFees } from "../models/student.fees.model.js";
 import { generateAgreement } from "../utils/pdf/generate.agreement..js";
+import { FeesMaster } from "../models/fees.model.js";
 
 const createDocument = asyncHandler(async (req, res) => {
   const { student, documentType, description } = req.body;
@@ -95,7 +96,7 @@ const generateAgreementPdf = asyncHandler(async (req, res) => {
   }
   try {
     const feeStructure = await StudentFees.findById(feesStructureId)
-      .select("student class session fees")
+      .select("student class session fees feesMaster")
       .populate("student class session");
 
     if (!feeStructure) {
@@ -103,6 +104,10 @@ const generateAgreementPdf = asyncHandler(async (req, res) => {
         .status(404)
         .json(new ApiRes(404, null, "Fee structure not found"));
     }
+
+    const feesMaster = await FeesMaster.findById(feeStructure.feesMaster)
+      .select("group")
+      .populate("group");
 
     const studentInfo = {
       studentName:
@@ -134,8 +139,17 @@ const generateAgreementPdf = asyncHandler(async (req, res) => {
     };
 
     const feesInfo = feeStructure.fees;
+    const feesGroupName = feesMaster.group.name;
+    const boardingStatus = feeStructure.student.boardingStatus;
 
-    generateAgreement(res, studentInfo, guardianInfo, feesInfo);
+    generateAgreement(
+      res,
+      studentInfo,
+      guardianInfo,
+      feesInfo,
+      feesGroupName,
+      boardingStatus
+    );
   } catch (error) {
     Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, error.message));

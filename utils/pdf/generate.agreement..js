@@ -18,7 +18,14 @@ const fonts = {
 
 const printer = new pdfMake(fonts);
 
-async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
+async function generateAgreement(
+  res,
+  studentInfo,
+  guardianInfo,
+  feesInfo,
+  feesGroupName,
+  boardingStatus
+) {
   // Today's date for dynamic insertion
   const today = new Date().toLocaleDateString("en-US", {
     day: "numeric",
@@ -51,19 +58,25 @@ async function generateAgreement(res, studentInfo, guardianInfo, feesInfo) {
         style: "body",
       },
       {
-        text: `- Student's Name  :   ${studentInfo.studentName || "N/A"}\n- Father's Name    :   ${studentInfo.fatherName || "N/A"}\n- Mother's Name   :   ${studentInfo.motherName || "N/A"}\n- Date of Birth        :   ${studentInfo.dob || "N/A"}\n- Grade                    :   ${studentInfo.grade || "N/A"}\n- Academic Year    :   ${studentInfo.academicYear || "N/A"}
-        ${
-          feesInfo && feesInfo.length > 0
-            ? feesInfo
-                .map(
-                  (fee) => `
-        - ${fee.name} : ${fee.finalAmount || "N/A"}
-      `
-                )
-                .join("")
-            : "No fees information available."
-        }`,
+        text: `- Student's Name  :   ${studentInfo.studentName || "N/A"}\n- Father's Name     :   ${studentInfo.fatherName || "N/A"}\n- Mother's Name   :   ${studentInfo.motherName || "N/A"}\n- Date of Birth        :   ${studentInfo.dob || "N/A"}\n- Grade                    :   ${studentInfo.grade || "N/A"}\n- Academic Year    :   ${studentInfo.academicYear || "N/A"}\n- Fees Group        :   ${feesGroupName || "N/A"}\n- Boarding Status  :   ${boardingStatus || "N/A"}\n\n`,
         style: "body",
+      },
+      {
+        text: "Fees Information:",
+        style: "subheader",
+      },
+      {
+        style: "tableExample",
+        table: {
+          widths: [200, "*"], // Defines width for two columns: fee name and amount
+          body: [
+            ["Fee Name", "Amount"], // Column headers
+            ...(feesInfo && feesInfo.length > 0
+              ? feesInfo.map((fee) => [fee.name, fee.finalAmount || "N/A"])
+              : [["No fees information available", ""]]), // If no fees, show a placeholder
+          ],
+        },
+        layout: "lightHorizontalLines", // Optional: adds horizontal lines between rows
       },
 
       { text: "2. School’s Commitments:", style: "subheader" },
