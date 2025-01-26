@@ -13,12 +13,28 @@ const createFeesHeader = asyncHandler(async (req, res) => {
         .json(new ApiRes(400, null, "All fields are required"));
     }
 
-    const existingFeesHeader = await FeesHeader.findOne({ name, feesCode });
+    const currentYear = new Date().getFullYear();
+
+    const existingFeesHeader = await FeesHeader.findOne({
+      $or: [{ name }, { feesCode }],
+      $expr: { $eq: [{ $year: "$createdAt" }, currentYear] },
+    });
 
     if (existingFeesHeader) {
-      return res
-        .status(400)
-        .json(new ApiRes(400, null, "Fees header already exists"));
+      let message = `A fees header with the same `;
+      if (
+        existingFeesHeader.name === name &&
+        existingFeesHeader.feesCode === feesCode
+      ) {
+        message += `name and fees code`;
+      } else if (existingFeesHeader.name === name) {
+        message += `name`;
+      } else if (existingFeesHeader.feesCode === feesCode) {
+        message += `fees code`;
+      }
+      message += ` already exists for the year ${currentYear}.`;
+
+      return res.status(400).json(new ApiRes(400, null, message));
     }
 
     const newFeesHeader = new FeesHeader({
@@ -54,12 +70,28 @@ const createFeesGroup = asyncHandler(async (req, res) => {
         .json(new ApiRes(400, null, "Name and group code is required"));
     }
 
-    const existingFeesGroup = await FeesGroup.findOne({ name, groupCode });
+    const currentYear = new Date().getFullYear();
+
+    const existingFeesGroup = await FeesGroup.findOne({
+      $or: [{ name }, { groupCode }],
+      $expr: { $eq: [{ $year: "$createdAt" }, currentYear] },
+    });
 
     if (existingFeesGroup) {
-      return res
-        .status(400)
-        .json(new ApiRes(400, null, "Fees group already exists"));
+      let message = `A fees group with the same `;
+      if (
+        existingFeesGroup.name === name &&
+        existingFeesGroup.groupCode === groupCode
+      ) {
+        message += `name and group code`;
+      } else if (existingFeesGroup.name === name) {
+        message += `name`;
+      } else if (existingFeesGroup.groupCode === groupCode) {
+        message += `group code`;
+      }
+      message += ` already exists for the year ${currentYear}.`;
+
+      return res.status(400).json(new ApiRes(400, null, message));
     }
 
     const newFeesGroup = new FeesGroup({
@@ -93,13 +125,22 @@ const createFeesMaster = asyncHandler(async (req, res) => {
         .json(new ApiRes(400, null, "Group and headers are required"));
     }
 
-    const existingFeesMaster = await FeesMaster.findOne({ group });
+    const currentYear = new Date().getFullYear();
+
+    const existingFeesMaster = await FeesMaster.findOne({
+      group,
+      $expr: { $eq: [{ $year: "$createdAt" }, currentYear] },
+    });
 
     if (existingFeesMaster) {
       return res
         .status(400)
         .json(
-          new ApiRes(400, null, "Fees master already exists with this group")
+          new ApiRes(
+            400,
+            null,
+            `Fees master already exists with this group for the year ${currentYear}`
+          )
         );
     }
 
@@ -245,9 +286,7 @@ const addHeaderToMaster = asyncHandler(async (req, res) => {
 
 const getAllHeaders = asyncHandler(async (req, res) => {
   try {
-    const headers = await FeesHeader.find().select(
-      "-__v -createdAt -updatedAt"
-    );
+    const headers = await FeesHeader.find().select("-__v -updatedAt");
     return res
       .status(200)
       .json(new ApiRes(200, headers, "Fees headers fetched successfully"));
@@ -259,7 +298,7 @@ const getAllHeaders = asyncHandler(async (req, res) => {
 
 const getAllGroups = asyncHandler(async (req, res) => {
   try {
-    const groups = await FeesGroup.find().select("-__v -createdAt -updatedAt");
+    const groups = await FeesGroup.find().select("-__v -updatedAt");
     return res
       .status(200)
       .json(new ApiRes(200, groups, "Fees groups fetched successfully"));
@@ -286,7 +325,7 @@ const getAllGroupsForDropdown = asyncHandler(async (req, res) => {
 const getAllMasters = asyncHandler(async (req, res) => {
   try {
     const masters = await FeesMaster.find()
-      .select("-__v -createdAt -updatedAt")
+      .select("-__v -updatedAt")
       .populate({
         path: "headers.header",
         select: "-__v -createdAt -updatedAt",
