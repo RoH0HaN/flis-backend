@@ -7,6 +7,19 @@ import {
   CONTACT_NUMBER,
 } from "../../src/constants.js";
 
+function formatDate(date) {
+  const [year, month, day] = date.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+function formatTime(time) {
+  const [hour, minute] = time.split(":");
+  const hourInt = parseInt(hour, 10);
+  const period = hourInt >= 12 ? "PM" : "AM";
+  const hour12 = hourInt % 12 || 12;
+  return `${hour12}:${minute} ${period}`;
+}
+
 async function sendCounsellingEmail(
   guardianName,
   guardianEmail,
@@ -17,6 +30,10 @@ async function sendCounsellingEmail(
   if (!guardianEmail) {
     throw new Error("Recipient email is required.");
   }
+
+  const formattedDate = formatDate(counsellingDate);
+  const formattedTime = formatTime(counsellingTime);
+
   // Nodemailer config
   let config = {
     service: "gmail",
@@ -47,8 +64,8 @@ async function sendCounsellingEmail(
         data: [
           {
             "Student Name": studentName,
-            "Counselling Date": counsellingDate,
-            "Counselling Time": counsellingTime,
+            "Counselling Date": formattedDate,
+            "Counselling Time": formattedTime,
             Venue: SCHOOL_ADDRESS,
           },
         ],
