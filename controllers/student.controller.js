@@ -1,6 +1,7 @@
 import { Admission } from "../models/admission.model.js";
 import { Section } from "../models/class.model.js";
 import { Document } from "../models/document.model.js";
+import { HealthRecord } from "../models/health.record.model.js";
 import { StudentFees } from "../models/student.fees.model.js";
 import { Student } from "../models/student.model.js";
 import { ApiRes, validateFields } from "../utils/api.response.js";
@@ -357,6 +358,10 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       "-__v -createdAt -updatedAt"
     );
 
+    const healthRecords = await HealthRecord.findOne({ studentId: id }).select(
+      "-__v -createdAt -updatedAt"
+    );
+
     const mergedStudentDetails = {
       ...student.student_details, // Base object
       ...student.applicationId?.student_details, // Overwrites fields from applicationId if available
@@ -380,6 +385,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       studentFeesId: feesStructure?._id,
       admission_date: student.admission_date,
       documents: documents,
+      health_records: healthRecords,
     };
 
     return res
