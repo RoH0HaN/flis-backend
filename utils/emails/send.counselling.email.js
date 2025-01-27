@@ -50,7 +50,7 @@ async function sendCounsellingEmail(
     theme: "default",
     product: {
       name: SCHOOL_NAME || "Your School Name",
-      link: "https://flisindia.com/",
+      link: "https://flis.in/",
       logo: "https://flisindia.com/flis-gse/items/logos/flis-title-transparent.webp", // optional: add school logo
     },
   });
@@ -84,7 +84,7 @@ async function sendCounsellingEmail(
         button: {
           color: "#22BC66", // Optional action button color
           text: "View School Website",
-          link: "https://flisindia.com/",
+          link: "https://flis.in/",
         },
       },
       outro: `We look forward to welcoming you and the student to our school community soon. If you have any further questions, feel free to reply to this email or call us directly.`,

@@ -320,6 +320,8 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
         "communication_address.current_address.police_station": 1,
         "communication_address.current_address.postal_code": 1,
         application_status: 1,
+        counselling_time: 1,
+        counselling_date: 1,
       }
     );
 
@@ -352,6 +354,8 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
           },
         },
         application_status: status,
+        counselling_time,
+        counselling_date,
       } = application;
 
       return {
@@ -374,6 +378,8 @@ const getApplicationsBasedOnStatus = asyncHandler(async (req, res) => {
           postal_code,
         },
         status,
+        counselling_time,
+        counselling_date,
       };
     });
 
