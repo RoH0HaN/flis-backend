@@ -51,7 +51,7 @@ async function sendCounsellingEmail(
     product: {
       name: SCHOOL_NAME || "Your School Name",
       link: "https://flis.in/",
-      logo: "https://flisindia.com/flis-gse/items/logos/flis-title-transparent.webp", // optional: add school logo
+      logo: "https://firebasestorage.googleapis.com/v0/b/flis-storage-d44aa.firebasestorage.app/o/FLIS_LOGO.jpg?alt=media&token=0bc2d40d-67c2-4a2c-a73b-e4012e362ef7", // optional: add school logo
     },
   });
 

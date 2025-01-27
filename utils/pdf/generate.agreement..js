@@ -58,11 +58,11 @@ async function generateAgreement(
         style: "body",
       },
       {
-        text: `- Student's Name  :   ${studentInfo.studentName || "N/A"}\n- Father's Name     :   ${studentInfo.fatherName || "N/A"}\n- Mother's Name   :   ${studentInfo.motherName || "N/A"}\n- Date of Birth        :   ${studentInfo.dob || "N/A"}\n- Grade                    :   ${studentInfo.grade || "N/A"}\n- Academic Year    :   ${studentInfo.academicYear || "N/A"}\n- Fees Group        :   ${feesGroupName || "N/A"}\n- Boarding Status  :   ${boardingStatus || "N/A"}\n\n`,
+        text: `- Student's Name  :   ${studentInfo.studentName || "N/A"}\n- Father's Name     :   ${studentInfo.fatherName || "N/A"}\n- Mother's Name   :   ${studentInfo.motherName || "N/A"}\n- Date of Birth        :   ${studentInfo.dob || "N/A"}\n- Grade                    :   ${studentInfo.grade || "N/A"}\n- Academic Year    :   ${studentInfo.academicYear || "N/A"}\n- Fees Group          :   ${feesGroupName || "N/A"}\n- Boarding Status  :   ${boardingStatus || "N/A"}\n\n`,
         style: "body",
       },
       {
-        text: "Fees Information:",
+        text: "2. Fees Information:",
         style: "subheader",
       },
       {
@@ -79,13 +79,13 @@ async function generateAgreement(
         layout: "lightHorizontalLines", // Optional: adds horizontal lines between rows
       },
 
-      { text: "2. School’s Commitments:", style: "subheader" },
+      { text: "3. School’s Commitments:", style: "subheader" },
       {
         text: "The School agrees to provide education and related services to the student(s) in accordance with the School’s curriculum and policies. The School shall maintain a safe and conducive learning environment for the student(s).\n\n",
         style: "body",
       },
 
-      { text: "3. Guardians’ Commitments:", style: "subheader" },
+      { text: "4. Guardians’ Commitments:", style: "subheader" },
       {
         ul: [
           "Ensure the student(s) attend school regularly and punctually, abiding by the school’s schedule and academic calendar.",
@@ -95,25 +95,25 @@ async function generateAgreement(
         style: "body",
       },
 
-      { text: "4. Tuition and Fees:", style: "subheader" },
+      { text: "5. Tuition and Fees:", style: "subheader" },
       {
         text: "The Guardians shall pay tuition and fees as determined by the School. The payment schedule, including due dates and payment methods, will be provided separately by the School.\n\n",
         style: "body",
       },
 
-      { text: "5. Communication:", style: "subheader" },
+      { text: "6. Communication:", style: "subheader" },
       {
         text: "The School shall regularly communicate with the Guardians about the student(s)’ progress, school events, and important information through official channels such as emails, newsletters, and parent-teacher meetings.\n\n",
         style: "body",
       },
 
-      { text: "6. Absences and Leave:", style: "subheader" },
+      { text: "7. Absences and Leave:", style: "subheader" },
       {
         text: "The Guardians shall inform the School in advance in case of the student(s)’ absence or leave requests, following the School’s specified procedures.\n\n",
         style: "body",
       },
 
-      { text: "7. Termination of Agreement:", style: "subheader" },
+      { text: "8. Termination of Agreement:", style: "subheader" },
       {
         text: "This Agreement shall remain in effect for the duration of the student(s)’ enrollment at the School, and it may be terminated by either party with written notice as per the School’s policies.\n\n",
         style: "body",
