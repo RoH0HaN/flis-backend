@@ -148,7 +148,7 @@ const studentSchema = new Schema(
     },
     boardingStatus: {
       type: String,
-      enum: ["REGULAR", "BOARDER", "HOSTELLER"],
+      enum: ["DAILY-SCHOLAR", "DAY-BOARDER", "HOSTELLER"],
       default: "REGULAR",
     },
   },

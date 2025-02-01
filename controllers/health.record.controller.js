@@ -5,6 +5,7 @@ import { asyncHandler } from "../utils/async.handler.js";
 import { Logger } from "../utils/logger.js";
 import mongoose, { isValidObjectId } from "mongoose";
 import { uploadPdfToFirebase } from "../utils/upload.pdf.firebase.js";
+import { deleteFromFirebase } from "../utils/delete.from.firebase.js";
 
 const addHealthRecord = asyncHandler(async (req, res) => {
   const studentId = req.params.studentId;
@@ -97,4 +98,52 @@ const getHealthRecordOfStudent = asyncHandler(async (req, res) => {
   }
 });
 
-export { addHealthRecord, getHealthRecordOfStudent };
+const deleteDietChartFromHealthRecord = asyncHandler(async (req, res) => {
+  const { studentId, index } = req.query;
+
+  if (!studentId || !isValidObjectId(studentId)) {
+    return res
+      .status(400)
+      .json(new ApiRes(400, null, "Invalid or missing student ID"));
+  }
+
+  try {
+    const recordDocument = await HealthRecord.findOne({ studentId });
+
+    if (!recordDocument) {
+      return res
+        .status(404)
+        .json(
+          new ApiRes(404, null, "Health record not found for this student")
+        );
+    }
+
+    console.log(recordDocument.records[index].dietChartUrl);
+
+    const deleted = await deleteFromFirebase(
+      recordDocument.records[index].dietChartUrl
+    );
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json(new ApiRes(404, null, "Diet chart not found for this student"));
+    }
+
+    recordDocument.records[index].dietChartUrl = "";
+
+    await recordDocument.save();
+
+    return res
+      .status(200)
+      .json(new ApiRes(200, null, "Diet chart deleted successfully"));
+  } catch (error) {
+    Logger(error, "error");
+    return res.status(500).json(new ApiRes(500, null, error.message));
+  }
+});
+export {
+  addHealthRecord,
+  getHealthRecordOfStudent,
+  deleteDietChartFromHealthRecord,
+};

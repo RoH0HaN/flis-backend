@@ -386,6 +386,7 @@ const getStudentDetails = asyncHandler(async (req, res) => {
       admission_date: student.admission_date,
       documents: documents,
       health_records: healthRecords,
+      boarding_status: student.boardingStatus,
     };
 
     return res
