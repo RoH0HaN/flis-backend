@@ -132,6 +132,8 @@ const deleteDietChartFromHealthRecord = asyncHandler(async (req, res) => {
 
     recordDocument.records[index].dietChartUrl = "";
 
+    recordDocument.markModified(`records.${index}.dietChartUrl`);
+
     await recordDocument.save();
 
     return res
