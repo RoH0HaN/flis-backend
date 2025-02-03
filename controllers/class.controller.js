@@ -6,40 +6,27 @@ import mongoose, { isValidObjectId } from "mongoose";
 
 const createClass = asyncHandler(async (req, res) => {
   try {
-    const { name, minAge, maxAge, feesMasters, description } = req.body;
+    const { name, minAge, maxAge, description } = req.body;
 
-    const requiredFields = [
-      "name",
-      "minAge",
-      "maxAge",
-      "feesMasters",
-      "description",
-    ];
+    const requiredFields = ["name", "minAge", "maxAge", "description"];
 
     // Use the utility function
     if (validateFields(req.body, requiredFields, res) !== true) {
       return;
     }
 
-    if (!Array.isArray(feesMasters) || !feesMasters.every(isValidObjectId)) {
-      return res
-        .status(400)
-        .json(new ApiRes(400, null, "Invalid feeMasters ObjectId(s)"));
-    }
-
-    const existingClass = await Class.findOne({ name, minAge, maxAge });
+    const existingClass = await Class.findOne({ name });
 
     if (existingClass) {
       return res
         .status(400)
-        .json(new ApiRes(400, null, "Class already exists"));
+        .json(new ApiRes(400, null, "Class already exists with this name"));
     }
 
     const newClass = new Class({
       name,
       minAge,
       maxAge,
-      feesMasters,
       description,
     });
 
@@ -171,7 +158,7 @@ const createSection = asyncHandler(async (req, res) => {
 const getAllClasses = asyncHandler(async (req, res) => {
   try {
     const classes = await Class.find({})
-      .select("-__v -createdAt -updatedAt -feesMasters -description")
+      .select("-__v -createdAt -updatedAt")
       .populate({
         path: "sections",
         select: "-__v -createdAt -updatedAt -classId",
@@ -185,5 +172,11 @@ const getAllClasses = asyncHandler(async (req, res) => {
     return res.status(500).json(new ApiRes(500, null, error.message));
   }
 });
+
+// delete section
+
+// update section to update max students
+
+// delete section from class
 
 export { createClass, deleteClass, updateClass, createSection, getAllClasses };

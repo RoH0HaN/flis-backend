@@ -18,7 +18,6 @@ const classSchema = new Schema(
     sections: [{ type: Schema.Types.ObjectId, ref: "Section" }], // Array of Section references
     minAge: { type: Number, required: true },
     maxAge: { type: Number, required: true },
-    feesMasters: [{ type: Schema.Types.ObjectId, ref: "FeesMaster" }],
     description: { type: String, default: "N/A" },
   },
   { timestamps: true }
