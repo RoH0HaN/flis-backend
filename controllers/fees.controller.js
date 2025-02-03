@@ -265,9 +265,19 @@ const addHeaderToMaster = asyncHandler(async (req, res) => {
         .json(new ApiRes(404, null, "Fees master not found"));
     }
 
-    headers.forEach((header) => {
+    for (const header of headers) {
+      const headerExists = master.headers.some(
+        (existingHeader) =>
+          existingHeader.header.toString() === header.header.toString()
+      );
+
+      if (headerExists) {
+        continue;
+      }
+
+      // If header does not exist, add it to the master
       master.headers.push({ header: header.header, amount: 0 });
-    });
+    }
 
     await master.save();
 
