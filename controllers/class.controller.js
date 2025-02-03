@@ -8,7 +8,7 @@ const createClass = asyncHandler(async (req, res) => {
   try {
     const { name, minAge, maxAge, description } = req.body;
 
-    const requiredFields = ["name", "minAge", "maxAge", "description"];
+    const requiredFields = ["name", "minAge", "maxAge"];
 
     // Use the utility function
     if (validateFields(req.body, requiredFields, res) !== true) {
