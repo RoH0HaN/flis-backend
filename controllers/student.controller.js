@@ -54,6 +54,7 @@ const handleCreateStudent = async ({
   section_info,
   session_info,
   boardingStatus,
+  session,
 }) => {
   if (!application_id || !mongoose.isValidObjectId(application_id)) {
     return {
@@ -62,7 +63,9 @@ const handleCreateStudent = async ({
     };
   }
 
-  const student = await Student.findOne({ applicationId: application_id });
+  const student = await Student.findOne({
+    applicationId: application_id,
+  }).session(session);
 
   if (student) {
     return {
@@ -85,14 +88,15 @@ const handleCreateStudent = async ({
     section_info,
     session_info: session_info.id,
     boardingStatus,
+    admission_date: new Date(),
+    currentStatus: "FEES",
   });
 
-  newStudent.admission_date = new Date();
-  newStudent.currentStatus = "FEES";
+  await newStudent.save({ session });
 
-  await newStudent.save();
-
-  const section = await Section.findById(section_info).select("currStudents");
+  const section = await Section.findById(section_info)
+    .select("currStudents")
+    .session(session);
 
   if (section) {
     section.currStudents += 1;

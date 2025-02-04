@@ -11,61 +11,60 @@ const handleCreateFees = async ({
   fees_info,
   class_info,
   session_info,
+  session,
 }) => {
   if (!studentId || !mongoose.isValidObjectId(studentId)) {
     return {
       feeMassage: "Student ID is required",
     };
   }
-  // console.log(studentId, fees_info, class_info, session_info);
 
   try {
-    let returnId = "";
-    for (const item of fees_info) {
-      const feesMaster = await FeesMaster.findOne({
-        group: item,
-      }).populate({
+    const feesMaster = await FeesMaster.findOne({
+      group: fees_info,
+    })
+      .populate({
         path: "headers.header",
-      });
+      })
+      .session(session);
 
-      if (!feesMaster) return;
+    if (!feesMaster) return;
 
-      const studentFees = await StudentFees.findOne({
-        student: studentId,
-        feesMaster: feesMaster._id,
-      });
+    const studentFees = await StudentFees.findOne({
+      student: studentId,
+      feesMaster: feesMaster._id,
+    }).session(session);
 
-      if (studentFees) {
-        returnId = studentFees._id;
-        continue;
-      }
-
-      const newFeesStructure = new StudentFees({
-        student: studentId,
-        session: session_info,
-        class: class_info,
-        feesMaster: feesMaster._id,
-        fees: feesMaster.headers.map((item) => ({
-          name: item.header.name,
-          feesCode: item.header.feesCode,
-          occurrence: item.header.occurrence,
-          amount: item.amount,
-          discountAmount: 0,
-          finalAmount: item.amount,
-          dueDate: item.header.dueDate,
-          paidAmount: 0,
-        })),
-        totalFinalAmount: feesMaster.headers.reduce(
-          (sum, item) => sum + item.amount,
-          0
-        ),
-      });
-
-      await newFeesStructure.save();
-      returnId = newFeesStructure._id;
+    if (studentFees) {
+      return { feesStructureId: studentFees._id };
     }
-    return { feesStructureId: returnId };
+
+    const newFeesStructure = new StudentFees({
+      student: studentId,
+      session: session_info,
+      class: class_info,
+      feesMaster: feesMaster._id,
+      fees: feesMaster.headers.map((item) => ({
+        name: item.header.name,
+        feesCode: item.header.feesCode,
+        occurrence: item.header.occurrence,
+        amount: item.amount,
+        discountAmount: 0,
+        finalAmount: item.amount,
+        dueDate: item.header.dueDate,
+        paidAmount: 0,
+      })),
+      totalFinalAmount: feesMaster.headers.reduce(
+        (sum, item) => sum + item.amount,
+        0
+      ),
+    });
+
+    await newFeesStructure.save({ session });
+
+    return { feesStructureId: newFeesStructure._id };
   } catch (error) {
+    Logger.error(error);
     return "";
   }
 };

@@ -137,6 +137,9 @@ const updateApplication = asyncHandler(async (req, res) => {
       .json(new ApiRes(400, null, "Invalid or missing admission ID"));
   }
 
+  const session = await mongoose.startSession(); // Start a transaction session
+  session.startTransaction();
+
   try {
     const admission = await Admission.findById(id);
 
@@ -157,6 +160,7 @@ const updateApplication = asyncHandler(async (req, res) => {
     } = req.body;
 
     let { fees_info } = req.body;
+
     // Check if a new student photo is provided
     if (req.file) {
       const studentPhotoUrl = await uploadImageToFirebase(
@@ -188,7 +192,7 @@ const updateApplication = asyncHandler(async (req, res) => {
     admission.counselling_status = "APPROVED";
 
     // Save the updated admission document
-    await admission.save();
+    await admission.save({ session });
 
     const { message, studentId } = await handleCreateStudent({
       application_id: id,
@@ -204,16 +208,29 @@ const updateApplication = asyncHandler(async (req, res) => {
         id: session_info,
       },
       boardingStatus,
+      session,
     });
 
-    fees_info = [fees_info.split(",")];
+    if (!studentId) {
+      throw new Error("Failed to create student");
+    }
 
     const { feesStructureId } = await handleCreateFees({
       studentId,
-      fees_info: fees_info,
+      fees_info,
       class_info,
       session_info,
+      session,
     });
+
+    if (!feesStructureId) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new Error("Failed to create fees structure");
+    }
+
+    await session.commitTransaction(); // Commit all changes
+    session.endSession();
 
     return res
       .status(200)
@@ -221,6 +238,9 @@ const updateApplication = asyncHandler(async (req, res) => {
         new ApiRes(200, feesStructureId, `Admission updated and ${message}`)
       );
   } catch (error) {
+    await session.abortTransaction(); // Rollback all changes
+    session.endSession();
+
     Logger(error, "error");
     return res.status(500).json(new ApiRes(500, null, "Internal server error"));
   }

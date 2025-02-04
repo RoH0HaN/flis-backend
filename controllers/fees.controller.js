@@ -320,9 +320,10 @@ const getAllGroups = asyncHandler(async (req, res) => {
 
 const getAllGroupsForDropdown = asyncHandler(async (req, res) => {
   try {
-    const groups = await FeesGroup.find().select(
-      "-__v -createdAt -updatedAt -groupCode -description"
-    );
+    const groups = await FeesGroup.find({
+      _id: { $in: await FeesMaster.distinct("group") },
+    }).select("-__v -createdAt -updatedAt -groupCode -description");
+
     return res
       .status(200)
       .json(new ApiRes(200, groups, "Fees groups fetched successfully"));
