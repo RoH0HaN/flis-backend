@@ -16,43 +16,150 @@ import {
 } from "./student.controller.js";
 import { handleCreateFees } from "./student.fees.controller.js";
 
+// const generatePaymentLink = async (transaction_details, doc_id) => {
+//   const { amount, name, mobile } = transaction_details;
+
+//   try {
+//     const transactionId = uuidv4();
+
+//     const data = {
+//       merchantId: process.env.MERCHANT_ID,
+//       merchantTransactionId: transactionId,
+//       name: name,
+//       amount: amount * 100, // Convert to smallest currency unit
+//       redirectUrl: `https://flis-backend-prod.onrender.com/api/v1/admission/verify-payment?id=${transactionId}&doc_id=${doc_id}`,
+//       redirectMode: "POST",
+//       mobileNumber: mobile,
+//       paymentInstrument: { type: "PAY_PAGE" },
+//     };
+
+//     const payloadMain = Buffer.from(JSON.stringify(data)).toString("base64");
+//     const string = payloadMain + "/pg/v1/pay" + process.env.SALT_KEY;
+//     const checksum =
+//       crypto.createHash("sha256").update(string).digest("hex") + "###1";
+
+//     console.log("Data to be sent:", data);
+//     console.log("Base64 Encoded Payload:", payloadMain);
+//     console.log("Generated Checksum (X-VERIFY):", checksum);
+
+//     const response = await axios.post(
+//       `${process.env.PG_PRODUCTION_URL}/pay`,
+//       {
+//         request: payloadMain,
+//       },
+//       {
+//         headers: {
+//           accept: "application/json",
+//           "Content-Type": "application/json",
+//           "X-VERIFY": checksum,
+//         },
+//       }
+//     );
+
+//     console.log(response.data?.data?.instrumentResponse?.redirectInfo?.url);
+
+//     return response.data?.data?.instrumentResponse?.redirectInfo?.url || null;
+//   } catch (error) {
+//     Logger(error, "error");
+//     return null;
+//   }
+// };
+
+// const submitAdmissionFrom = asyncHandler(async (req, res) => {
+//   try {
+//     const {
+//       student_details,
+//       parent_guardian_details,
+//       communication_address,
+//       other_details,
+//       bank_details,
+//       transaction_details,
+//     } = req.body;
+
+//     const studentPhotoUrl = await uploadImageToFirebase(
+//       req.file.path,
+//       "student_images"
+//     );
+//     student_details.student_photo = studentPhotoUrl;
+
+//     // Creating a new admission document
+//     const newAdmission = new Admission({
+//       student_details,
+//       parent_guardian_details,
+//       communication_address,
+//       other_details,
+//       bank_details,
+//     });
+
+//     // Save the new admission to the database
+//     await newAdmission.save();
+
+//     const paymentUrl = await generatePaymentLink(
+//       transaction_details,
+//       newAdmission._id
+//     );
+
+//     if (paymentUrl) {
+//       return res
+//         .status(201)
+//         .json(
+//           new ApiRes(
+//             201,
+//             { paymentUrl },
+//             "Admission form submitted successfully."
+//           )
+//         );
+//     } else {
+//       return res
+//         .status(500)
+//         .json(
+//           new ApiRes(
+//             500,
+//             null,
+//             "An error occurred while connecting to PhonePe PG."
+//           )
+//         );
+//     }
+//   } catch (error) {
+//     Logger(error, "error");
+//     return res
+//       .status(500)
+//       .json(
+//         new ApiRes(500, null, "An error occurred while submitting the form.")
+//       );
+//   }
+// });
+
 const generatePaymentLink = async (transaction_details, doc_id) => {
   const { amount, name, mobile } = transaction_details;
+  const transactionId = uuidv4();
+
+  const data = {
+    merchantId: process.env.MERCHANT_ID,
+    merchantTransactionId: transactionId,
+    name,
+    amount: amount * 100, // Convert to smallest currency unit
+    redirectUrl: `http://localhost:3000/api/v1/admission/verify-payment?id=${transactionId}&doc_id=${doc_id}`,
+    redirectMode: "POST",
+    mobileNumber: mobile,
+    paymentInstrument: { type: "PAY_PAGE" },
+  };
+
+  const payloadMain = Buffer.from(JSON.stringify(data)).toString("base64");
+  const string = payloadMain + "/pg/v1/pay" + process.env.SALT_KEY;
+  const checksum =
+    crypto.createHash("sha256").update(string).digest("hex") + "###1";
 
   try {
-    const transactionId = uuidv4();
-
-    const data = {
-      merchantId: process.env.MERCHANT_ID,
-      merchantTransactionId: transactionId,
-      name: name,
-      amount: amount * 100, // Convert to smallest currency unit
-      redirectUrl: `http://localhost:1250/api/v1/admission/verify-payment?id=${transactionId}&doc_id=${doc_id}`,
-      redirectMode: "POST",
-      mobileNumber: mobile,
-      paymentInstrument: { type: "PAY_PAGE" },
-    };
-
-    const payloadMain = Buffer.from(JSON.stringify(data)).toString("base64");
-    const string = payloadMain + "/pg/v1/pay" + process.env.SALT_KEY;
-    const checksum =
-      crypto.createHash("sha256").update(string).digest("hex") + "###1";
-
-    console.log("Data to be sent:", data);
-    console.log("Base64 Encoded Payload:", payloadMain);
-    console.log("Generated Checksum (X-VERIFY):", checksum);
-
     const response = await axios.post(
       `${process.env.PG_TESTING_URL}/pay`,
-      {
-        request: payloadMain,
-      },
+      { request: payloadMain },
       {
         headers: {
           accept: "application/json",
           "Content-Type": "application/json",
           "X-VERIFY": checksum,
-        },
+        }, // timeout: 5000, // Fail fast if PhonePe takes too long
       }
     );
 
@@ -74,13 +181,14 @@ const submitAdmissionFrom = asyncHandler(async (req, res) => {
       transaction_details,
     } = req.body;
 
+    // Wait for student photo upload
     const studentPhotoUrl = await uploadImageToFirebase(
       req.file.path,
       "student_images"
     );
-    student_details.student_photo = studentPhotoUrl;
+    student_details.student_photo = studentPhotoUrl; // Assign after upload completes
 
-    // Creating a new admission document
+    // Create admission object but DO NOT SAVE YET
     const newAdmission = new Admission({
       student_details,
       parent_guardian_details,
@@ -89,13 +197,11 @@ const submitAdmissionFrom = asyncHandler(async (req, res) => {
       bank_details,
     });
 
-    // Save the new admission to the database
-    await newAdmission.save();
-
-    const paymentUrl = await generatePaymentLink(
-      transaction_details,
-      newAdmission._id
-    );
+    // Save admission & generate payment link in parallel
+    const [savedAdmission, paymentUrl] = await Promise.all([
+      newAdmission.save(),
+      generatePaymentLink(transaction_details, newAdmission._id),
+    ]);
 
     if (paymentUrl) {
       return res
@@ -119,7 +225,6 @@ const submitAdmissionFrom = asyncHandler(async (req, res) => {
         );
     }
   } catch (error) {
-    Logger(error, "error");
     return res
       .status(500)
       .json(
